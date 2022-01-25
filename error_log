@@ -1,0 +1,24 @@
+[10-Feb-2019 17:10:52 Asia/Dhaka] PHP Fatal error:  Call to a member function real_escape_string() on boolean in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 391
+[10-Feb-2019 17:10:52 Asia/Dhaka] PHP Fatal error:  Call to a member function real_escape_string() on boolean in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 391
+[10-Feb-2019 17:34:54 Asia/Dhaka] PHP Fatal error:  Call to a member function real_escape_string() on boolean in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 391
+[10-Feb-2019 17:34:54 Asia/Dhaka] PHP Fatal error:  Call to a member function real_escape_string() on boolean in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 391
+[24-Feb-2019 17:51:53] PHP Parse error:  syntax error, unexpected T_CONST in /home/dhakauniversityc/public_html/system/core/CodeIgniter.php on line 58
+[24-Feb-2019 17:52:01] PHP Parse error:  syntax error, unexpected T_CONST in /home/dhakauniversityc/public_html/system/core/CodeIgniter.php on line 58
+[24-Feb-2019 17:52:13] PHP Parse error:  syntax error, unexpected T_CONST in /home/dhakauniversityc/public_html/system/core/CodeIgniter.php on line 58
+[24-Feb-2019 17:53:02] PHP Parse error:  syntax error, unexpected T_CONST in /home/dhakauniversityc/public_html/system/core/CodeIgniter.php on line 58
+[27-Apr-2019 00:21:04 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:21:07 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:21:19 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:21:42 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:21:54 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:21:55 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:24:45 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:24:47 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:24:48 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:27:02 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:27:03 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:28:18 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:28:19 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:33:35 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[27-Apr-2019 00:35:07 Asia/Dhaka] PHP Fatal error:  Call to undefined function mysqli_init() in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_driver.php on line 135
+[26-Nov-2019 20:53:18 Asia/Dhaka] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 20480 bytes) in /home/dhakauniversityc/public_html/system/database/drivers/mysqli/mysqli_result.php on line 183
