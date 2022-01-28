@@ -4,6 +4,8 @@
             <div class="box">
                 <div class="box-header with-border">
                     <h3 class="box-title">View Account</h3>
+                    <a href="<?php echo site_url('cashbook/Accountindex'); ?>" class="btn btn-primary btn-sm
+                    pull-right" title="Record"><i class="glyphicon glyphicon-th-list"></i> Record</a>
                 </div>
                 <div class="box-body">
                     <table class="table table-bordered">

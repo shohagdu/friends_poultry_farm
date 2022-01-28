@@ -24,7 +24,7 @@ class Cashbook extends CI_Controller {
         $data = array();
         $data['accounts'] = $this->CASHBOOK->accounts();
         $view = array();
-        $data['title'] = "Accounts";
+        $data['title'] = "Accounts Records";
         $view['content'] = $this->load->view('dashboard/cashbook/accounts/index', $data, TRUE);
         $this->load->view('dashboard/index', $view);
     }
@@ -45,7 +45,7 @@ class Cashbook extends CI_Controller {
 
     function Accountstore() {
         $this->form_validation->set_error_delimiters('<div style="text-align: center;font-weight:bold;padding-bottom: 5px;padding-top:10px;">', '</div>');
-        $this->form_validation->set_rules('accountName', 'Account Name', 'required|min_length[4]|is_unique[tbl_pos_accounts.accountName]');
+        $this->form_validation->set_rules('accountName', 'Account Name', 'required|is_unique[tbl_pos_accounts.accountName]');
         $this->form_validation->set_rules('accountType', 'Account Type', 'required');
 
         if ($this->form_validation->run() == FALSE) {
@@ -91,14 +91,14 @@ class Cashbook extends CI_Controller {
         $this->load->view('dashboard/index', $view);
     }
 
-    function Accountupdate() {
+    function AccountUpdate() {
         $this->form_validation->set_error_delimiters('<div style="text-align: center;font-weight:bold;padding-bottom: 5px;padding-top:10px;">', '</div>');
         if ($this->input->post('accountName') != $this->input->post('original-accountName')) {
             $is_unique = '|is_unique[tbl_pos_accounts.accountName]';
         } else {
             $is_unique = '';
         }
-        $this->form_validation->set_rules('accountName', 'Account Name', 'required|min_length[4]' . $is_unique);
+        $this->form_validation->set_rules('accountName', 'Account Name', 'required' . $is_unique);
         $this->form_validation->set_rules('accountType', 'Account Type', 'required');
 
         if ($this->form_validation->run() == FALSE) {
@@ -120,7 +120,6 @@ class Cashbook extends CI_Controller {
                 redirect(base_url('cashbook/Accountedit/' . $this->input->post('accountID')));
             }
         }
-
         if ($this->CASHBOOK->updateAccount($this->input->post())) {
             $this->session->set_flashdata('msg', '<div style="text-align: center;font-weight:bold;padding-bottom: 5px;padding-top:10px;">Account updated!</div>');
             redirect(base_url('cashbook/Accountindex'));
@@ -142,7 +141,6 @@ class Cashbook extends CI_Controller {
     }
 
     public function getbankavailable() {
-
         $id = $this->input->post('bank_id');
         if ($id != '') {
             $data = $this->CASHBOOK->bankavailableblance($id);
@@ -150,88 +148,10 @@ class Cashbook extends CI_Controller {
         }
     }
 
-    function addbalancetransfer() {
-//        dumpVar($_POST);
 
-        $TRamount =$this->input->post('transactionAmount');
-        $data['transactionAmount'] = '-'.$TRamount;
-        $data['transactionAccountID'] = $this->input->post('fromtransactionAccountID');
-        $data['frmbnk'] = $this->input->post('totransactionAccountID');
-        $data['transactionNote'] = $this->input->post('transactionNote');
-        $data['date'] = $this->input->post('cDate');
-        $data['transactionType'] = 'TRANSFER BALANCE';
-        
-        $data['created_at'] = date("Y-m-d h:i:sa");
-        $this->COMMON_MODEL->insert_data('tbl_pos_transactions', $data);
-        
-        $TRamount =$this->input->post('transactionAmount');
-        $datas['transactionAmount'] = $TRamount;
-        $datas['frmbnk'] = $this->input->post('fromtransactionAccountID');
-        $datas['transactionAccountID'] = $this->input->post('totransactionAccountID');
-        $datas['transactionNote'] = $this->input->post('transactionNote');
-        $datas['date'] = $this->input->post('cDate');
-        $datas['transactionType'] = 'TRANSFER BALANCE';
-        $datas['trnfr_type'] = 1;
-        $datas['created_at'] = date("Y-m-d h:i:sa");
-        $this->COMMON_MODEL->insert_data('tbl_pos_transactions', $datas);
-        
-        redirect('cashbook/transferHistory');
-    }
-
-    function OpeningBalanceCreate() {
-        $data = array();
-        $data['accounts'] = $this->CASHBOOK->pendingAccountForOpening();
-        $view = array();
-        $data['title'] = "Opening Balance";
-        $view['content'] = $this->load->view('dashboard/cashbook/openingBalanceCreate', $data, TRUE);
-        $this->load->view('dashboard/index', $view);
-    }
-
-    function OpeningBalanceStore() {
-        $this->form_validation->set_error_delimiters('<div style="text-align: center;font-weight:bold;padding-bottom: 5px;padding-top:10px;">', '</div>');
-        $this->form_validation->set_rules('transactionAccountID', 'Account Name', 'required');
-        $this->form_validation->set_rules('transactionAmount', 'Opening Balance', 'required|numeric');
-
-        if ($this->form_validation->run() == FALSE) {
-            $this->session->set_flashdata('msg', validation_errors());
-            redirect(base_url('cashbook/OpeningBalanceCreate'));
-        }
-
-        if ($this->CASHBOOK->addOpeningBalance($this->input->post())) {
-            $this->session->set_flashdata('msg', '<div style="text-align: center;font-weight:bold;padding-bottom: 5px;padding-top:10px;">Opening Balance Added!</div>');
-            redirect(base_url('cashbook/Accountshow/' . $this->input->post('transactionAccountID')));
-        }
-    }
-
-    function transactionHistory() {
-        $data = array();
-        $data['accounts'] = $this->CASHBOOK->accounts();
-
-        if(isset($_POST['searchBtn'])){
-            $accid=$this->input->post('accountID');
-            $date=$this->input->post('date');
-            if($date!=''){
-                $exp_date=explode("-",$date);
-                $first=$exp_date[0];
-                $to=$exp_date[1];
-            }else{
-                $first='';
-                $to='';
-            }
-            $data['transactions'] = $this->CASHBOOK->transactions($this->input->post('accountID'),$first,$to);
-        }else{
-            $data['transactions']='';
-        }
-
-
-        $view = array();
-        $data['title'] = "Transaction History";
-        $view['content'] = $this->load->view('dashboard/cashbook/transactionHistory', $data, TRUE);
-        $this->load->view('dashboard/index', $view);
-    }
 
     function transferHistory(){
-        $data['trnsfrlist'] = $this->COMMON_MODEL->get_data_list2('tbl_pos_transactions' );
+        $data['trnsfrlist'] = [];
  
         $view = array();
         $data['title'] = "Transfer History";

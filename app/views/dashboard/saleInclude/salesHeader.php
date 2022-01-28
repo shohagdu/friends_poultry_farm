@@ -135,7 +135,7 @@
         <nav class="navbar navbar-static-top">
             <div class="container-fluid">
                 <div class="navbar-header pull-left">
-                    <a href="<?php echo base_url('welcome'); ?>" class="navbar-brand"><b>RED GREEN</b></a>
+                    <a href="<?php echo base_url('welcome'); ?>" class="navbar-brand"><b>Friends Poultry Farm</b></a>
                 </div>
                 <div class="navbar-custom-menu pull-right">
                     <ul class="nav navbar-nav">

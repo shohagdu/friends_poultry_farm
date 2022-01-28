@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title><?php echo isset($title) ? $title: 'RED GREEN'; ?></title>
+        <title><?php echo isset($title) ? $title: 'Friends Poultry Farm'; ?></title>
         <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
         <link rel="shortcut icon" href="<?php echo base_url(); ?>assets/image/favicon.ico">
         <link rel="stylesheet" href="<?php echo base_url(); ?>assets/bootstrap/css/bootstrap.min.css">
@@ -31,7 +31,7 @@
         <div class="wrapper">
             <header class="main-header">
                 <a href="<?php echo base_url(); ?>" class="logo">
-                    <span class="logo-lg">RED GREEN</span>
+                    <span class="logo-lg">Friends Poultry Farm</span>
                 </a>
                 <!-- Header Navbar: style can be found in header.less -->
                 <nav class="navbar navbar-static-top">

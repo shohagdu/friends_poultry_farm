@@ -51,7 +51,7 @@
                         <tr>
                             <th> SL</th>
                             <th> Date</th>
-                            <th> Payment By</th>
+                            <th class="width20per"> Payment By</th>
                             <th> Debit</th>
                             <th> Credit</th>
                             <th> Balance </th>
@@ -71,8 +71,9 @@
                                     <td class="text-left"><?php echo (!empty($row->sales_date)?date('d M, Y',strtotime
                                         ($row->sales_date)):'');
                                         ?></td>
-                                    <td class="text-left"><?php  $paymentBy=!empty($row->payment_by)?json_decode
-                                        ($row->payment_by,true):'';  ?>
+                                    <td class="text-left">
+                                        <?php  $paymentBy=(!empty($row->payment_by)?json_decode
+                                        ($row->payment_by,true):'');  ?>
                                         <table class="table-style width100per"  >
                                             <?php
                                             $paymentKey=[
@@ -86,12 +87,16 @@
                                                     ?>
                                                     <tr>
                                                         <td style="padding-right:8px; " class="text-left
-                                                        width70per"><?php
+                                                        width70per">
+                                                            <?php
                                                             echo
                                                             !empty
                                                             ($paymentKey[$key])
                                                                 ?$paymentKey[$key]:''; ?></td>
-                                                        <td style="width:33%;"><?php echo number_format($value,2) ?></td>
+                                                        <td style="width:33%;">
+                                                            <?php echo (!empty($value)?number_format($value,2):'0
+                                                            .00') ?>
+                                                        </td>
                                                     </tr>
                                                 <?php } } ?>
                                             </table>
@@ -111,7 +116,7 @@
                                         ?>
                                         <a target="_blank" href="<?php echo base_url('pos/show/'.$row->sales_id)
                                         ?>" class="btn btn-info btn-xs" title="Details"><i
-                                                class="glyphicon glyphicon-share-alt"></i></a>
+                                                class="glyphicon glyphicon-share-alt"></i> Invoice</a>
                                         <?php } ?>
                                     </td>
 

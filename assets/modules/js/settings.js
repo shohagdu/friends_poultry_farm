@@ -495,7 +495,6 @@ $(document).ready(function(){
     });
 
     // todo:: sales list information
-
     var SalesInfoTable = $('#SalesInfo').DataTable({
         'processing': true,
         'serverSide': true,
@@ -686,6 +685,33 @@ $(document).ready(function(){
     });
 
 
+    // Expense Calculation
+    var expenseInfoTBL = $('#expenseInfoTBL').DataTable({
+        'processing': true,
+        'serverSide': true,
+        'serverMethod': 'post',
+        //'searching': false, // Remove default Search Control
+        'ajax': {
+            'url':  base_url +"Expenses/showExpensesInfo",
+            'data': function(data){
+                data.expenseCtg = $('#customerID_11').val();
+                data.bankID = $('#salesID').val();
+                // data.dateRange = $('#reservation').val();
+            }
+        },
+        'columns': [
+            { data: 'serial_no', orderable: true, searchable: false  },
+            { data: 'payment_date', name: 'transaction_info.payment_date' },
+            { data: 'expenseCtgTitle', name: 'transaction_info.expenseCtgTitle' },
+            { data: 'accountName', name: 'transaction_info.accountName' },
+            { data: 'debit_amount', name: 'transaction_info.debit_amount' },
+            { data: 'remarks', name: 'transaction_info.remarks'},
+            { data: 'action',orderable: false, searchable: false },
+        ]
+    });
+    $('#customerName_11,#salesID,#reservation').change(function(){
+        expenseInfoTBL.draw();
+    });
 
 
 });
@@ -1586,7 +1612,6 @@ function searchingDailySalesStatement () {
 
 function deleteSalesInformation(id) {
     var confirmation = confirm("Are you sure you want to remove this Member?");
-
     if (confirmation) {
         $.ajax({
             url: base_url + "Pos/deleteSalesInfo",
@@ -1613,8 +1638,6 @@ function deleteSalesInformation(id) {
             }
         });
     }
-
-
 }
 
 $(".invoiceNumber").autocomplete({
@@ -1902,3 +1925,90 @@ $('.changeSearchProduct').click(function(){
         }
     });
 });
+
+$('#accountType').change(function(){
+    var accountType = $('#accountType').val();
+    if(accountType == 'BANK'){
+        $('.accountNumber').fadeIn();
+        $('.branchName').fadeIn();
+    }else{
+        $('.accountNumber').fadeOut();
+        $('.branchName').fadeOut();
+    }
+});
+
+function saveExpenseInfo() {
+    // $("#updateBtn").attr("disabled", true);
+    $.ajax({
+        url:  base_url +"expenses/updateExpenseItem/",
+        data: $('#expenseForm').serialize(),
+        type: "POST",
+        dataType:'JSON',
+        success: function (response) {
+            $("#updateBtn").attr("disabled", false);
+            if(response.status=='error'){
+                $("#show_error_save_info").html(response.message);
+            }else{
+                $('#purchaseProductModal').modal('toggle');
+
+                setTimeout(function(){
+                    alert(response.message);
+                    window.location = base_url + response.redirect_page;
+                },1500);
+
+            }
+        }
+    });
+}
+
+function deleteExpensesInformation(id) {
+    var confirmation = confirm("Are you sure you want to remove this Member?");
+    if (confirmation) {
+        $.ajax({
+            url: base_url + "Expenses/deleteExpInfo",
+            data: {id: id},
+            type: "POST",
+            dataType: 'JSON',
+            success: function (response) {
+                if (response.status == 'success') {
+                    $("#alert").show();
+                    $("#show_message").html(response.message);
+                    setTimeout(function () {
+                        $("#alert").hide();
+                        $("#show_message").html('');
+                        $('#expenseInfoTBL').DataTable().ajax.reload();
+                    }, 1500);
+                } else {
+                    $("#alert").show();
+                    $("#show_message").html(response.message);
+                    setTimeout(function () {
+                        $("#alert").hide();
+                        $("#show_message").html('');
+                    }, 3500);
+                }
+            }
+        });
+    }
+}
+
+$(".bank_id").change(function () {
+    var bank_id = $(this).val();
+    $.ajax({
+        type: "POST",
+        url: base_url+"Cashbook/getbankavailable",
+        data: 'bank_id=' + bank_id,
+        dataType: 'json',
+        success: function (data) {
+            $('.av_amount').val(data);
+        }
+    });
+});
+
+function checkAvailableGreater() {
+    var x = document.getElementById("availableAmount").value;
+    var y = document.getElementById("transAmount").value;
+    if (parseInt(x) < parseInt(y)) {
+        alert('Amount can not be greater then bank amount');
+        $("#transAmount").val('');
+    }
+}

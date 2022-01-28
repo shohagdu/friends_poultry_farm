@@ -1,66 +1,47 @@
 <section class="content">
     <div class="row">
         <div class="col-md-12">
+            <div class="box-body" id="alert" style="display: none;"> <div class="callout callout-info"><span    id="show_message"></span></div></div>
             <div class="box">
                 <div class="box-header">
                     <h3 class="box-title"><?php echo $title; ?></h3>
                     <?php if ($this->session->flashdata('msg')) { ?>
-
                         <?php echo $this->session->flashdata('msg'); ?>
-
                     <?php } ?>
-                    <a href="<?php echo site_url('expenses/create'); ?>" class="btn btn-primary btn-sm pull-right"><i class="glyphicon glyphicon-plus"></i> Add</a>
+                    <a href="<?php echo site_url('expenses/create'); ?>" class="btn btn-primary btn-sm pull-right"><i
+                                class="glyphicon glyphicon-plus"></i> Add New</a>
                 </div>
                 <div class="box-body">
-                    <table id="tbl1" class="table table-bordered table-hover">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <div class="col-sm-3 col-xs-8 clearfix">
+                                <select id="expenseCtg" class=" form-control" >
+                                    <option value="">Select Expense Head</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3 col-xs-4 clearfix">
+                                <select id="bankID" class=" form-control" >
+                                    <option value="">Select Expense Head</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="clearfix"></div>
+                    <table id="expenseInfoTBL" class='display dataTable table table-bordered table-hover' >
                         <thead>
                             <tr>
-                                <th style="width: 5%;">SL.</th>
-                                <th style="width: 20%;">Expense Head</th>
-                                <th style="width: 15%;">Sub Head</th>
-                                <th style="width: 25%;">Account</th>
-                                <th style="width: 5%;">Amount</th>
+                                <th style="width: 5%;">S/N</th>
                                 <th style="width: 15%;">Date</th>
+                                <th style="width: 20%;">Expense Category</th>
+                                <th style="width: 20%;">Account Info</th>
+                                <th style="width: 10%;">Exp. Account</th>
+                                <th style="width: 10%;">Remarks</th>
                                 <th style="width: 15%;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $sl = 1; ?>
-                            <?php foreach ($expenselist as $expense) { ?>
 
-                                <tr>
-                                    <td><?php echo $sl; ?></td>
-                                    <td>
-                                        <?php
-                                        $head_name = $this->COMMON_MODEL->get_single_data_by_single_column('tbl_pos_expense_head', 'expheadID', $expense['head_id']);
-                                        echo $head_name['title'];
-                                        ?>
-                                    </td>
-                                    <td>
-                                        <?php 
-                                        $subhead_name = $this->COMMON_MODEL->get_single_data_by_single_column('tbl_pos_exp_sub_head', 'subheadid', $expense['sub_head_id']);
-                                        echo $subhead_name['title'];
-                                        ?>
-                                    </td>
-                                    <td>
-                                        <?php
-                                        $accnt_name = $this->COMMON_MODEL->get_single_data_by_single_column('tbl_pos_accounts', 'accountID', $expense['account_id']);
-                                        echo $accnt_name['accountName'];
-                                        ?>
-                                    </td>
-                                    <td><?php echo $expense['amount']; ?></td>
-                                      <td><?php echo date('Y-m-d',strtotime($expense['created_at'])); ?></td>
-                                    <td>
-                                        <a style="margin-right: 5px;" href="<?php echo base_url('expenses/edit'); ?>/<?php echo $expense['expenseID']; ?>" class="btn btn-primary btn-sm pull-left">Edit</a>
-                                        <a href="<?php echo base_url('expenses/delete'); ?>/<?php echo $expense['expenseID']; ?>" onclick="return confirm('Are You sure, Your want to delete This!')" class="btn btn-danger btn-sm pull-left">Delete</a></td>
-                                </tr>
-
-
-                                <?php $sl++; ?>
-                            <?php } ?>
                         </tbody>
-                        <tfoot>
-                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -69,17 +50,16 @@
 </section>
 
 
-
 <script>
-    function updateModal(productid){
+    function updateModal(productid) {
         $('#productid').val(productid);
         $.ajax({
-            url:"<?php echo site_url('products/viewProductInfo'); ?>",
-            data:{sendId:productid},
-            type:"POST",
-            success:function(hr){
-                $("#showData").html(hr);	
-                        
+            url: "<?php echo site_url('products/viewProductInfo'); ?>",
+            data: {sendId: productid},
+            type: "POST",
+            success: function (hr) {
+                $("#showData").html(hr);
+
 
             }
         });

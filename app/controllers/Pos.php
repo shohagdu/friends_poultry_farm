@@ -409,9 +409,7 @@ class Pos extends CI_Controller
         $this->db->where('stock_type', 2);
         $this->db->update("stock_info", $info);
 
-
         $message = 'Successfully Delete this Information';
-
 
         $this->db->trans_complete();
         if ($this->db->trans_status() === true) {
@@ -422,7 +420,6 @@ class Pos extends CI_Controller
                 'redirect_page' => '']);
             exit;
         }
-
     }
 
     public function getInvoiceNumber()
