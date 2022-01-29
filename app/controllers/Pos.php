@@ -18,6 +18,7 @@ class Pos extends CI_Controller
         $this->load->model('Settings_model', 'SETTINGS', TRUE);
         $this->load->model('Common_model', 'COMMON_MODEL', TRUE);
         $this->load->model('Products_model', 'PRODUCTS', TRUE);
+        $this->load->model('Cashbook_model', 'CASHBOOK', TRUE);
 
         $user_outlet= $this->session->userdata('outlet_data');
         $this->outletID=$user_outlet['outlet_id'];
@@ -37,14 +38,14 @@ class Pos extends CI_Controller
         $data['inventory'] = [];
         $data['config'] =[];
         $data['memverInfo'] = [];
-        $todate=date('D');
+        $data['accounts'] = $this->CASHBOOK->accounts();
         $this->load->view('dashboard/pos', $data);
     }
 
     public function save_sales_info(){
-        //echo "<pre>";
-       // print_r($_POST);
-       // exit;
+//        echo "<pre>";
+//        print_r($_POST);
+//        exit;
         extract($_POST);
         $payment_byInfo=[];
         if(!empty($payment_by)){
@@ -53,18 +54,25 @@ class Pos extends CI_Controller
             }
         }
         $this->db->trans_start();
-        if(empty($customer) && $allAreRunningCustomer !=1){
+        if(empty($customer)){
             echo json_encode(['status'=>'error','message'=>'Customer is required','data'=>'']);exit;
         }
         if(empty($subTotal)){
             echo json_encode(['status'=>'error','message'=>'Total Amount is required','data'=>'']);exit;
         }
+
+        if(empty($receivedBankAcc) && !empty($paidNow)  && $paidNow>0){
+            echo json_encode(['status'=>'error','message'=>'Received Bank is required','data'=>'']);exit;
+        }
+
+
         if(empty($productID[0])){
             echo json_encode(['status'=>'error','message'=>'Minimum one product is required','data'=>'']);exit;
         }
-        if((isset($allAreRunningCustomer) && $allAreRunningCustomer==1) && empty($isRemainingDueMakesWithDiscount)  && ($totalAmount!= $paidNow) ){
-            echo json_encode(['status'=>'error','message'=>'Invoice and Paid amount must be equal. Because Running Customer.','data'=>'']);exit;
-        }
+//
+//        if((isset($allAreRunningCustomer) && $allAreRunningCustomer==1) && empty($isRemainingDueMakesWithDiscount)  && ($totalAmount!= $paidNow) ){
+//            echo json_encode(['status'=>'error','message'=>'Invoice and Paid amount must be equal. Because Running Customer.','data'=>'']);exit;
+//        }
         if(empty($upId)){
             $sales_info=[
                 'sales_date'                        => !empty($saleDate)?date('Y-m-d',strtotime($saleDate)):'',
@@ -116,22 +124,27 @@ class Pos extends CI_Controller
 
             if(!empty($totalAmount)){
                 $total_transaction=[
+                    'transCode'             =>  time(),
                     'customer_member_id'    =>  $customer,
                     'sales_id'              =>  $insert_id,
                     'payment_by'            =>  NULL,
-                    'debit_amount'          =>  $totalAmount,
+                    'credit_amount'          =>  $totalAmount,
                     'created_by'            =>  $this->userId,
                     'created_time'          =>  $this->dateTime,
                     'created_ip'            =>  $this->ipAddress,
                 ];
                 $this->db->insert("transaction_info",$total_transaction);
+                $parent_id=$this->db->insert_id();
             }
             if(!empty($paidNow)){
                 $payment_transaction=[
+                    'transCode'                 =>  time(),
                     'customer_member_id'        =>  $customer,
                     'sales_id'                  =>  $insert_id,
                     'payment_by'                =>  (!empty($payment_byInfo)?json_encode($payment_byInfo):''),
-                    'credit_amount'             =>  $paidNow,
+                    'debit_amount'              =>  $paidNow,
+                    'bank_id'                   =>  $receivedBankAcc,
+                    'parent_id'                 =>  $parent_id,
                     'created_by'                =>  $this->userId,
                     'created_time'              =>  $this->dateTime,
                     'created_ip'                =>  $this->ipAddress,
@@ -226,7 +239,7 @@ class Pos extends CI_Controller
                 $total_transaction=[
                     'customer_member_id'    =>  $customer,
                     'payment_by'            =>  NULL,
-                    'debit_amount'          =>  $totalAmount,
+                    'credit_amount'         =>  $totalAmount,
                     'updated_by'            =>  $this->userId,
                     'updated_time'          =>  $this->dateTime,
                     'updated_ip'            =>  $this->ipAddress,
@@ -237,7 +250,8 @@ class Pos extends CI_Controller
                 $payment_transaction=[
                     'customer_member_id'        =>  $customer,
                     'payment_by'                =>  (!empty($payment_byInfo)?json_encode($payment_byInfo):''),
-                    'credit_amount'             =>  $paidNow,
+                    'debit_amount'              =>  $paidNow,
+                    'bank_id'                   =>  $receivedBankAcc,
                     'updated_by'                =>  $this->userId,
                     'updated_time'              =>  $this->dateTime,
                     'updated_ip'                =>  $this->ipAddress,
@@ -377,6 +391,14 @@ class Pos extends CI_Controller
            echo $this->SETTINGS->getcustomername($q);
         }
     }
+    public function getSupplierName()
+    {
+        if (isset($_GET['term'])) {
+            $q = strtolower($_GET['term']);
+           echo $this->SETTINGS->getcustomername($q,2);
+        }
+    }
+
     function get_product_list_by_branch()
     {
         if (isset($_GET['term'])) {

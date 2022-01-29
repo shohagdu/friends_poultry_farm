@@ -40,6 +40,14 @@ $(function () {
         }
     });
 
+    $("#supplierNameSearch").autocomplete({
+        source: base_url+"Pos/getSupplierName",
+        select: function(event, ui) {
+            $("#supplierNameSearchId").val(ui.item.id);
+            $("#supplierNameSearch").val(ui.item.value);
+            return false;
+        }
+    });
 });
 function get_element_id(id_arr){
     var id = id_arr.split("_");
@@ -426,7 +434,6 @@ $(document).ready(function(){
             { data: 'email', name: 'customer_shipment_member_info.email'},
             { data: 'address', name: 'customer_shipment_member_info.address'},
             { data: 'remarks', name: 'customer_shipment_member_info.remarks'},
-            { data: 'current_stock', name: 't.current_stock' },
             { data: 'current_due', name: 't.current_due' },
             { data: 'is_active', name: 'customer_shipment_member_info.is_active' },
             { data: 'action',orderable: false, searchable: false },
@@ -647,9 +654,9 @@ $(document).ready(function(){
         'columns': [
             { data: 'serial_no', orderable: true, searchable: false  },
             { data: 'member_name', name: 'member.member_name' },
-            { data: 'trans_date', name: 'shipment_stock_details.trans_date' },
-            { data: 'credit_amount', name: 'shipment_stock_details.credit_amount' },
-            { data: 'remarks', name: 'shipment_stock_details.remarks' },
+            { data: 'payment_date', name: 'transaction_info.payment_date' },
+            { data: 'credit_amount', name: 'transaction_info.credit_amount' },
+            { data: 'remarks', name: 'transaction_info.remarks' },
             { data: 'action',orderable: false, searchable: false },
         ]
     });
@@ -674,7 +681,7 @@ $(document).ready(function(){
             { data: 'serial_no', orderable: true, searchable: false  },
             { data: 'customer_info', name: 'member.customer_info' },
             { data: 'payment_date', name: 'transaction_info.payment_date' },
-            { data: 'credit_amount', name: 'transaction_info.credit_amount' },
+            { data: 'debit_amount', name: 'transaction_info.debit_amount' },
             { data: 'remarks', name: 'transaction_info.remarks' },
             { data: 'action',orderable: false, searchable: false },
         ]
@@ -694,8 +701,8 @@ $(document).ready(function(){
         'ajax': {
             'url':  base_url +"Expenses/showExpensesInfo",
             'data': function(data){
-                data.expenseCtg = $('#customerID_11').val();
-                data.bankID = $('#salesID').val();
+                data.expenseCtg = $('#expenseCtg').val();
+                data.bankID = $('#bankID').val();
                 // data.dateRange = $('#reservation').val();
             }
         },
@@ -709,9 +716,39 @@ $(document).ready(function(){
             { data: 'action',orderable: false, searchable: false },
         ]
     });
-    $('#customerName_11,#salesID,#reservation').change(function(){
+    $('#expenseCtg,#bankID,#reservation').change(function(){
         expenseInfoTBL.draw();
     });
+
+    // Transaction History
+    var transferHitoryTBL = $('#transferHitoryTBL').DataTable({
+        'processing': true,
+        'serverSide': true,
+        'serverMethod': 'post',
+        //'searching': false, // Remove default Search Control
+        'ajax': {
+            'url':  base_url +"Cashbook/showTransferInfo",
+            'data': function(data){
+                data.expenseCtg     = $('#expenseCtg').val();
+                data.bankID         = $('#bankID').val();
+                // data.dateRange = $('#reservation').val();
+            }
+        },
+        'columns': [
+            { data: 'serial_no', orderable: true, searchable: false  },
+            { data: 'payment_date', name: 'transaction_info.payment_date' },
+            { data: 'fromBankName', name: 'transaction_info.fromBankName' },
+            { data: 'accountName', name: 'transaction_info.accountName' },
+            { data: 'debit_amount', name: 'transaction_info.debit_amount' },
+            { data: 'remarks', name: 'transaction_info.remarks'},
+            { data: 'action',orderable: false, searchable: false },
+        ]
+    });
+    $('#expenseCtg,#bankID,#reservation').change(function(){
+        transferHitoryTBL.draw();
+    });
+
+
 
 
 });
@@ -797,7 +834,7 @@ function saveOutletInfo() {
         $("#purchaseNo").val('SIN-'+randomString(6));
         $("#tranferNo").val('TNO-'+randomString(6));
     });
-    
+    /*
     var scntDiv = $('#tableDynamic');
     var iStockIN = $('#tableDynamic tr').size() + 1;
     $('#addRowStockIn').on('click', function () {
@@ -828,8 +865,8 @@ function saveOutletInfo() {
         iStockIN++;
         return false;
     });
-         
 
+*/
     $(document).on("click", ".deleteRow", function (e) {
         if ($('#tableDynamic tr').size() > 1) {
             var target = e.target;
@@ -1566,10 +1603,10 @@ $(document).on("keyup", ".quantPurchase,.unitPrice ", function (event) {
 });
 
 function purchaseTotalCal() {
-    if ($("#tableDynamic tr").size() == 0) {
+    if ($("#tableDynamicPurchase tr").size() == 0) {
         return $("#net_purchase_amount").val(0);
     }
-    $("#tableDynamic tr").each(function () {
+    $("#tableDynamicPurchase tr").each(function () {
         row_total = 0;
         $(".totalPrice").each(function () {
             row_total += Number(parseFloat($(this).val()));
@@ -1938,7 +1975,7 @@ $('#accountType').change(function(){
 });
 
 function saveExpenseInfo() {
-    // $("#updateBtn").attr("disabled", true);
+     $("#updateBtn").attr("disabled", true);
     $.ajax({
         url:  base_url +"expenses/updateExpenseItem/",
         data: $('#expenseForm').serialize(),
@@ -2011,4 +2048,132 @@ function checkAvailableGreater() {
         alert('Amount can not be greater then bank amount');
         $("#transAmount").val('');
     }
+}
+function checkingSameBankAcc() {
+    var from_id = document.getElementById("from_id").value;
+    var to_id = document.getElementById("to_id").value;
+    if (from_id == to_id) {
+        alert('Opps !! Bank can not be same');
+        $("#to_id").val('');
+    }
+}
+
+function saveBankTransfer() {
+    $("#updateBtn").attr("disabled", true);
+    $.ajax({
+        url:  base_url +"cashbook/addbalancetransfer/",
+        data: $('#transferInfoFrom').serialize(),
+        type: "POST",
+        dataType:'JSON',
+        success: function (response) {
+            $("#updateBtn").attr("disabled", false);
+            if(response.status=='error'){
+                $("#alert_error").show();
+                $("#show_error_save_info").html(response.message);
+            }else{
+                $("#alert").show();
+                $("#show_message").html(response.message);
+                setTimeout(function(){
+                    window.location = base_url +response.redirect_page;
+                },1500);
+
+            }
+        }
+    });
+}
+
+function deleteBankTransferInformation(id) {
+    var confirmation = confirm("Are you sure you want to remove this Member?");
+    if (confirmation) {
+        $.ajax({
+            url: base_url + "Cashbook/deleteBankTransferInfo",
+            data: {id: id},
+            type: "POST",
+            dataType: 'JSON',
+            success: function (response) {
+                if (response.status == 'success') {
+                    $("#alert").show();
+                    $("#show_message").html(response.message);
+                    setTimeout(function () {
+                        $("#alert").hide();
+                        $("#show_message").html('');
+                        $('#transferHitoryTBL').DataTable().ajax.reload();
+                    }, 1500);
+                } else {
+                    $("#alert").show();
+                    $("#show_message").html(response.message);
+                    setTimeout(function () {
+                        $("#alert").hide();
+                        $("#show_message").html('');
+                    }, 3500);
+                }
+            }
+        });
+    }
+}
+
+$("#purchaseProductSearch").autocomplete({
+    source: function (request, response) {
+        $.getJSON(base_url+"pos/get_product_list_by_branch", {term: request.term},
+            response);
+    },
+    response: function (event, ui) {
+        if(ui.content){
+            if(ui.content.length == 1){
+                console.log(ui.content);
+                addRowProductPurchase(ui.content[0].id,ui.content[0].productPrice, ui.content[0].value,ui.content[0].productCode,ui.content[0].unit_sale_price);
+                $(this).val('');
+                $(this).focus();
+                $(this).autocomplete('close');
+                return false;
+            }
+        }
+
+    },
+    select: function (event, ui) {
+        addRowProductPurchase(ui.item.id, ui.item.productPrice, ui.item.value,ui.item.productCode,ui.item.unit_sale_price);
+        $(this).val('');
+        return false;
+    }
+
+});
+
+var scntDivPurchase = $('#tableDynamicPurchase');
+var iStockIN = $('#tableDynamicPurchase tr').size() + 1;
+console.log(iStockIN);
+function addRowProductPurchase(id,purchasePrice,productInfo,productCode,salePrice){
+    var pQty;
+    // todo: IF PRODUCT IS EXIST THEN AUTOMATIC ADD IN QUEUE START
+    var productID = parseFloat($('#productID_' + id).val());
+    var productPrice = parseFloat($("#unitPrice_" + id).val());
+    var productQuantity = parseInt($('#quantity_' + id).val());
+    if(isNaN(productQuantity)){
+        pQty=0;
+    }else{
+       pQty=productQuantity;
+    }
+
+    if (productID == id) {
+        $('#quantity_' + id).val(pQty + 1);
+        if (!isNaN(productPrice)) {
+            var total = (pQty + 1) * productPrice;
+            $('#totalPrice_' + id).val(total.toFixed(2));
+        }
+        return purchaseTotalCal();
+    }
+
+    $(`<tr>
+        <td>${iStockIN}</td>
+        <td style="font-weight: bold;font-size: 15px">
+            `+productInfo+`
+            <input type="hidden" name="productID[]"  value="`+id+`" id="productID_${id}" class="form-control">
+        </td>
+        <td><input type="text" required name="quantity[]" id="quantity_${id}" placeholder="Quantity" class="quantPurchase form-control only-number"></td>
+         <td><input type="text" required name="unitPrice[]" value="`+purchasePrice+`" id="unitPrice_${id}" placeholder="Unit Price" class="unitPrice form-control only-number"></td>
+         <td><input type="text" required name="totalPrice[]" readonly  tabindex="-1" id="totalPrice_${id}" placeholder="Total Price" class="totalPrice form-control only-number"></td>
+        <td><a href="javascript:void(0);" id="deleteRow_${id}"  class="deleteRow btn btn-danger  btn-sm"><i class="glyphicon glyphicon-remove"></i></a></td>
+    </tr>`).appendTo(scntDivPurchase);
+
+    iStockIN++;
+    return false;
 }

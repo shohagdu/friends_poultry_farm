@@ -39,7 +39,7 @@ class Purchases extends CI_Controller {
     function create() {
         $data = array();
         $view = array();
-        $data['title'] = "Add Stock IN";
+        $data['title'] = "Add New Purchase Information";
         $view['content'] = $this->load->view('dashboard/purchases/create', $data, TRUE);
         $this->load->view('dashboard/index', $view);
     }
@@ -75,9 +75,13 @@ class Purchases extends CI_Controller {
 
     public function save_purchase_info(){
         extract($_POST);
+        if(empty($supplierNameSearchId)){
+            echo json_encode(['status'=>'error','message'=>'Supplier Name is required','data'=>'']);exit;
+        }
         if(empty($purchaseNo)){
             echo json_encode(['status'=>'error','message'=>'Purchase No is required','data'=>'']);exit;
         }
+
         if(empty($purchaseDate)){
             echo json_encode(['status'=>'error','message'=>'Purchase Date is required','data'=>'']);exit;
         }
@@ -88,6 +92,7 @@ class Purchases extends CI_Controller {
         if(empty($update_id)){
             $this->db->trans_start();
             $data=[
+                'supplier_id'       =>$supplierNameSearchId,
                 'purchase_id'       =>$purchaseNo,
                 'purchase_date'     =>(!empty($purchaseDate)?$purchaseDate:''),
                 'note'              =>$note,
@@ -101,9 +106,11 @@ class Purchases extends CI_Controller {
             $this->db->insert("purchase_info_stock_in",$data);
             $insert_id=$this->db->insert_id();
             $productInfo=[];
+            $purchaseTotalAmount=0;
             if(!empty($productID)){   
                 foreach($productID as $key=>$product){
                     if(!empty($product) && !empty($unitPrice[$key]) && !empty($quantity[$key])) {
+                        $purchaseTotalAmount+=$unitPrice[$key] * $quantity[$key];
                         $stock_info[] = [
                             'product_id'    => $product,
                             'purchase_id'   => $insert_id,
@@ -136,6 +143,19 @@ class Purchases extends CI_Controller {
                 if(!empty($productInfo)){
                     $this->db->update_batch("product_info",$productInfo,'id');
                 }
+
+                $purchase_transaction=[
+                    'transCode'                 =>  time(),
+                    'customer_member_id'        =>  $supplierNameSearchId,
+                    'payment_date'              =>  (!empty($purchaseDate)?$purchaseDate:''),
+                    'debit_amount'              =>  $purchaseTotalAmount,
+                    'type'                      =>  6,
+                    'created_by'                =>  $this->userId,
+                    'created_time'              =>  $this->dateTime,
+                    'created_ip'                =>  $this->ipAddress,
+                ];
+                $this->db->insert("transaction_info",$purchase_transaction);
+
             }
             $redierct_page='purchases/index';
             $this->db->trans_complete();
@@ -150,14 +170,14 @@ class Purchases extends CI_Controller {
             // when update
             $this->db->trans_start();
             $data=[
-               // 'purchase_id'=>$purchaseNo,
-                'purchase_date' =>(!empty($purchaseDate)?$purchaseDate:''),
-                'note'          =>$note,
-                'outlet_id'     =>$this->outletID,
-                'is_active'     =>1,
-                'updated_by'    =>$this->userId,
-                'updated_time'  =>$this->dateTime,
-                'updated_ip'    =>$this->ipAddress,
+                'supplier_id'   => $supplierNameSearchId,
+                'purchase_date' => (!empty($purchaseDate)?$purchaseDate:''),
+                'note'          => $note,
+                'outlet_id'     => $this->outletID,
+                'is_active'     => 1,
+                'updated_by'    => $this->userId,
+                'updated_time'  => $this->dateTime,
+                'updated_ip'    => $this->ipAddress,
             ];
             $this->db->where("id",$update_id);
             $this->db->update("purchase_info_stock_in",$data);
@@ -165,8 +185,12 @@ class Purchases extends CI_Controller {
             $create_stock_info=[];
             //echo "<pre>";
            // print_r($productID);
+            $purchaseTotalAmount='0.00';
             if(!empty($productID)){
                 foreach($productID as $key=>$product){
+
+                    $purchaseTotalAmount += $unitPrice[$key] * $quantity[$key];
+
                     if(!empty($stock_id[$key])) {
                         $update_stock_info[] = [
                             'id'            => $stock_id[$key],
@@ -230,6 +254,18 @@ class Purchases extends CI_Controller {
                 if(!empty($create_stock_info)) {
                     $this->db->insert_batch("stock_info",$create_stock_info);
                 }
+
+                $purchase_transaction=[
+                    'customer_member_id'        =>  $supplierNameSearchId,
+                    'payment_date'              =>  (!empty($purchaseDate)?$purchaseDate:''),
+                    'debit_amount'              =>  $purchaseTotalAmount,
+                    'type'                      =>  6,
+                    'created_by'                =>  $this->userId,
+                    'created_time'              =>  $this->dateTime,
+                    'created_ip'                =>  $this->ipAddress,
+                ];
+                $this->db->where("purchase_id",$update_id);
+                $this->db->update("transaction_info",$purchase_transaction);
             }
             $redierct_page='purchases/index';
             $this->db->trans_complete();
@@ -360,4 +396,21 @@ class Purchases extends CI_Controller {
         }
     }
 
+    public  function supplierInfo(){
+        $data = array();
+        $view = array();
+        $data['title']          = 'Supplier';
+        $data['type']           = 2;
+        $data['redierct_page']  = 'Purchases/supplierInfo';
+        $view['content'] = $this->load->view('dashboard/settings/customer_member_Info/shipment_member', $data, TRUE);
+        $this->load->view('dashboard/index', $view);
+    }
+
+    function supplierPayment() {
+        $data['accounts']        = $this->SETTINGS->account();
+        $view = array();
+        $data['title']          = "Supplier Due Collection";
+        $view['content']        = $this->load->view('dashboard/shipment/member_due_collection', $data, TRUE);
+        $this->load->view('dashboard/index', $view);
+    }
 }

@@ -482,6 +482,7 @@ class Settings extends CI_Controller
         $data['title']='Customer Due Collection';
         $data['redierct_page']='settings/customer_due_collection';
         $data['outlet_info']= $this->SETTINGS->outlet_info();
+        $data['accounts']            = $this->SETTINGS->account();
         $view['content'] = $this->load->view('dashboard/settings/customer_member_Info/customer_due_collection', $data, TRUE);
         $this->load->view('dashboard/index', $view);
     }
@@ -790,6 +791,8 @@ class Settings extends CI_Controller
         }
         if(empty($customer_id)){
             echo json_encode(['status'=>'error','message'=>'Customer Name is required','data'=>'']);exit;
+        }if(empty($accountID)){
+            echo json_encode(['status'=>'error','message'=>'Accounts Name is required','data'=>'']);exit;
         }
         if(empty($payment_now)){
             echo json_encode(['status'=>'error','message'=>'Payment Amount is required','data'=>'']);exit;
@@ -806,15 +809,16 @@ class Settings extends CI_Controller
         if(empty($upId)){
             $this->db->trans_start();
             $payment_transaction=[
-                'customer_member_id'  =>  $customer_id,
-                'payment_by'  =>  (!empty($payment_byInfo)?json_encode($payment_byInfo):''),
-                'credit_amount'  =>  $payment_now,
-                'payment_date'  =>  (!empty($payment_date)?date('Y-m-d',strtotime($payment_date)):''),
-                'type'=>  3,
-                'remarks'  =>  $remarks,
-                'created_by'=>  $this->userId,
-                'created_time'=>$this->dateTime,
-                'created_ip'=>  $this->ipAddress,
+                'customer_member_id'        =>  $customer_id,
+                'payment_by'                =>  (!empty($payment_byInfo)?json_encode($payment_byInfo):''),
+                'debit_amount'              =>  $payment_now,
+                'bank_id'                   =>  $accountID,
+                'payment_date'              =>  (!empty($payment_date)?date('Y-m-d',strtotime($payment_date)):''),
+                'type'                      =>  3,
+                'remarks'                   =>  $remarks,
+                'created_by'                =>  $this->userId,
+                'created_time'              =>  $this->dateTime,
+                'created_ip'                =>  $this->ipAddress,
             ];
             $this->db->insert("transaction_info",$payment_transaction);
 
@@ -835,13 +839,15 @@ class Settings extends CI_Controller
             // when update
             $this->db->trans_start();
             $data=[
-                'member_id'=>$member_id,
-                'credit_qty'=>$delivery_qty,
-                'trans_date'=>(!empty($delivery_date)?date('Y-m-d',strtotime($delivery_date)):''),
-                'remarks'=>$remarks,
-                'updated_by'=>$this->userId,
-                'updated_time'=>$this->dateTime,
-                'updated_ip'=>$this->ipAddress,
+                'customer_member_id'        =>  $customer_id,
+                'payment_by'                =>  (!empty($payment_byInfo)?json_encode($payment_byInfo):''),
+                'debit_amount'              =>  $payment_now,
+                'bank_id'                   =>  $accountID,
+                'payment_date'              =>  (!empty($payment_date)?date('Y-m-d',strtotime($payment_date)):''),
+                'remarks'                   =>  $remarks,
+                'updated_by'                =>  $this->userId,
+                'updated_time'              =>  $this->dateTime,
+                'updated_ip'                =>  $this->ipAddress,
             ];
             $this->db->where("id",$upId);
             $this->db->update("shipment_stock_info",$data);

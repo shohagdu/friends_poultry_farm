@@ -1,9 +1,4 @@
-<!-- Content Header (Page header) -->
-<section class="content-header">
 
-</section>
-
-<!-- Main content -->
 <section class="content">
     <div class="row">
         <div class="col-md-4"></div>
@@ -11,11 +6,6 @@
             <div class="box">
                 <div class="box-header with-border">
                     <h3 class="box-title">Account</h3>
-                    <?php if ($this->session->flashdata('msg')) { ?>
-
-                        <?php echo $this->session->flashdata('msg'); ?>
-
-                    <?php } ?>
                 </div>
                 <div class="box-body">
                     <form action="<?php echo base_url('cashbook/transactionHistory'); ?>" method="post">

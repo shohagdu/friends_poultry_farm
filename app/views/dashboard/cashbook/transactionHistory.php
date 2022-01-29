@@ -1,17 +1,10 @@
-<?php
-extract($_POST);
-?>
 <section class="content">
     <div class="row">
         <div class="col-md-12">
+            <div class="box-body" id="alert" style="display: none;"> <div class="callout callout-info"><span    id="show_message"></span></div></div>
             <div class="box">
                 <div class="box-header with-border">
                     <h3 class="box-title">Account</h3>
-                    <?php if ($this->session->flashdata('msg')) { ?>
-
-                        <?php echo $this->session->flashdata('msg'); ?>
-
-                    <?php } ?>
                 </div>
                 <div class="box-body">
                     <form action="<?php echo base_url('cashbook/transactionHistory'); ?>" method="post">

@@ -15,14 +15,15 @@ class Cashbook extends CI_Controller {
 
         $this->load->model('Cashbook_model', 'CASHBOOK', TRUE);
         $this->load->model('Common_model', 'COMMON_MODEL', TRUE);
-        //echo "<pre>";
-        //print_r($this->input->post());
-        //exit();
+
+        $this->userId               = $this->session->userdata('user');
+        $this->dateTime             = date('Y-m-d H:i:s');
+        $this->ipAddress            = $_SERVER['REMOTE_ADDR'];
     }
 
     function Accountindex() {
         $data = array();
-        $data['accounts'] = $this->CASHBOOK->accounts();
+        $data['accounts'] = $this->CASHBOOK->accounts('','',[0,1]);
         $view = array();
         $data['title'] = "Accounts Records";
         $view['content'] = $this->load->view('dashboard/cashbook/accounts/index', $data, TRUE);
@@ -30,7 +31,7 @@ class Cashbook extends CI_Controller {
     }
 
     function transferadd() {
-        $data = array();
+        $data['accounts'] = $this->CASHBOOK->accounts();
         $view = array();
         $view['content'] = $this->load->view('dashboard/cashbook/accounts/transferadd', $data, TRUE);
         $this->load->view('dashboard/index', $view);
@@ -85,7 +86,7 @@ class Cashbook extends CI_Controller {
 
     function Accountedit($accountID) {
         $data = array();
-        $data['accounts'] = $this->CASHBOOK->accounts($accountID);
+        $data['accounts'] = $this->CASHBOOK->accounts($accountID,'',[0,1]);
         $view = array();
         $view['content'] = $this->load->view('dashboard/cashbook/accounts/edit', $data, TRUE);
         $this->load->view('dashboard/index', $view);
@@ -151,8 +152,6 @@ class Cashbook extends CI_Controller {
 
 
     function transferHistory(){
-        $data['trnsfrlist'] = [];
- 
         $view = array();
         $data['title'] = "Transfer History";
         $view['content'] = $this->load->view('dashboard/cashbook/accounts/transferHistory', $data, TRUE);
@@ -173,5 +172,99 @@ class Cashbook extends CI_Controller {
         $view['content'] = $this->load->view('dashboard/cashbook/balanceStatement', $data, TRUE);
         $this->load->view('dashboard/index', $view);
     }
+    function addbalancetransfer() {
+        extract($_POST);
+//        echo "<pre>";
+//        print_r($_POST);
+//        exit;
+        $this->db->trans_start();
+        if(empty($fromtransactionAccountID)){
+            echo json_encode(['status'=>'error','message'=>'From Bank Account is required','data'=>'']);exit;
+        }
+        if(empty($totransactionAccountID)){
+            echo json_encode(['status'=>'error','message'=>'From Bank Account is required','data'=>'']);exit;
+        }
+        if(empty($transactionAmount)){
+            echo json_encode(['status'=>'error','message'=>'Amount is required','data'=>'']);exit;
+        }
+        if(empty($cDate)){
+            echo json_encode(['status'=>'error','message'=>'Date  is required','data'=>'']);exit;
+        }
+        $info = array(
+            'transCode'             => time(),
+            'remarks'               => $transactionNote,
+            'payment_date'          => date('Y-m-d',strtotime($cDate)),
+            'created_by'            => $this->userId,
+            'created_time'          => $this->dateTime,
+            'created_ip'            => $this->ipAddress,
+        );
 
+
+        $debitInfo                      = $info;
+        $debitInfo['type']              = 4; // Expense Head
+        $debitInfo['debit_amount']      = $transactionAmount;
+        $debitInfo['bank_id']           =  $totransactionAccountID;
+        $this->db->insert("transaction_info", $debitInfo);
+
+        $parentID=$this->db->insert_id();
+        if(!empty($parentID)) {
+            $creditInfo                     = $info;
+            $creditInfo['type']             = 5; // Bank Credit
+            $creditInfo['credit_amount']    = $transactionAmount;
+            $creditInfo['bank_id']          = $fromtransactionAccountID;
+            $creditInfo['parent_id']        = $parentID;
+            $this->db->insert("transaction_info", $creditInfo);
+        }
+        $message = 'Successfully Saved Your Record';
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === true) {
+            $redirectUrl='cashbook/transferHistory';
+            echo json_encode(['status' => 'success', 'message' => $message,'redirect_page'=>$redirectUrl]);
+            exit;
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Fetch a problem, data not update',
+                'redirect_page' => '']);
+            exit;
+        }
+    }
+
+    public function showTransferInfo(){
+        $postData = $this->input->post();
+        $data = $this->CASHBOOK->showTransferInfo($postData);
+        echo json_encode($data);
+    }
+    public function deleteBankTransferInfo(){
+        extract($_POST);
+        $this->db->trans_start();
+        if(empty($id)){
+            echo json_encode(['status'=>'error','message'=>'ID is required','data'=>'']);exit;
+        }
+        $info = array(
+            'is_active'         => 0,
+            'updated_by'        => $this->userId,
+            'updated_time'      => $this->dateTime,
+            'updated_ip'        => $this->ipAddress,
+        );
+
+        $this->db->where('id', $id);
+        $this->db->where('type', 4);
+        $this->db->update("transaction_info", $info);
+
+        $this->db->where('parent_id', $id);
+        $this->db->where('type', 5);
+        $this->db->update("transaction_info", $info);
+
+        $message = 'Successfully Delete this Information';
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === true) {
+            echo json_encode(['status' => 'success', 'message' => $message]);
+            exit;
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Fetch a problem, data not update',
+                'redirect_page' => '']);
+            exit;
+        }
+    }
 }

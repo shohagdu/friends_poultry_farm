@@ -26,16 +26,15 @@
                     <table id="MemberInfo" class='display dataTable table table-bordered table-hover' >
                         <thead>
                         <tr>
-                            <th style="width:5%;">SL.</th>
+                            <th style="width:2%;">SL.</th>
                             <th>Name</th>
                             <th>Mobile</th>
                             <th>Email</th>
                             <th>Address</th>
                             <th>Remarks</th>
-                            <th>Current Stock</th>
-                            <th>Current Due Amount</th>
+                            <th style="width:10%;">Due Amount</th>
                             <th>Status</th>
-                            <th style="width:15%;">Action</th>
+                            <th style="width:18%;">Action</th>
                         </tr>
                         </thead>
                         <tbody>

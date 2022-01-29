@@ -52,12 +52,12 @@ class Expenses_model extends CI_Model {
             $this->db->or_like('debit_amount', $searchInfo);
         }
         $this->db->join('all_settings_info as expenseCtg', 'expenseCtg.id = transaction_info.expense_ctg', 'left');
-         $this->db->join('tbl_pos_accounts', 'tbl_pos_accounts.accountID = transaction_info.bank_id', 'left');
+        $this->db->join('transaction_info as fromExpBank', 'fromExpBank.parent_id = transaction_info.id', 'inner');
+         $this->db->join('tbl_pos_accounts', 'tbl_pos_accounts.accountID = fromExpBank.bank_id', 'left');
 
         $this->db->order_by("transaction_info.id", "DESC");
         $this->db->limit($rowperpage, $start);
         $records = $this->db->get('transaction_info')->result();
-        // return $this->db->last_query();
         $data = array();
         $i=(!empty($start)?$start+1:1);
         if(!empty($records)) {

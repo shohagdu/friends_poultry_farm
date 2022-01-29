@@ -111,6 +111,7 @@ class Products_model extends CI_Model {
                 $data[$key]['id'] = $result[$key]['id'];
                 $data[$key]['productCode'] = $result[$key]['productCode'];
                 $data[$key]['productName'] = $result[$key]['name'];
+                $data[$key]['productPrice'] = $result[$key]['purchase_price'];
                 $data[$key]['bandTitle'] = $result[$key]['bandTitle'];
                 $data[$key]['sourceTitle'] = $result[$key]['sourceTitle'];
                 $data[$key]['ProductTypeTitle'] = $result[$key]['ProductTypeTitle'];

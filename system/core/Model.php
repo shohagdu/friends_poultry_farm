@@ -84,7 +84,15 @@ class CI_Model {
         }
         $records = $this->db->get($table)->result();
         return $records[0]->allcount;
-
 	}
+    public function __get_count_row_inner_join($table,$where=NULL)
+    {
+        $this->db->select('count(*) as allcount');
+        if(!empty($where)){
+            $this->db->where($where);
+        }
+        $records = $this->db->join('transaction_info as fromTransferHistory', 'fromTransferHistory.parent_id = transaction_info.id', 'inner')->get($table)->result();
+        return $records[0]->allcount;
+    }
 
 }

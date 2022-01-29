@@ -604,7 +604,7 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
         //all default searching
         $search_arr[] = "  transaction_info.type = 3 ";
         $search_arr[] = "  transaction_info.is_active = 1 ";
-        $search_arr[] = "  transaction_info.outletID =  ".$this->outletID;
+//        $search_arr[] = "  transaction_info.outletID =  ".$this->outletID;
 
         // Custom search filter
         $customerID = !empty($postData['customerID'])?$postData['customerID']:'';

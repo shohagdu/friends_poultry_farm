@@ -86,6 +86,19 @@
                                    id="due_amount">
                         </div>
                     </div>
+                    <div class="form-group col-sm-12">
+                        <label class="col-sm-3 text-right">
+                            Account Name
+                        </label>
+                        <div class="col-sm-9">
+                            <select name="accountID" class="form-control select2" style="width: 100%;">
+                                <option value="">Select Account</option>
+                                <?php if(!empty($accounts)){ foreach ($accounts as $account) { ?>
+                                    <option value="<?php echo $account->accountID; ?>"><?php echo $account->accountName; ?></option>
+                                <?php } } ?>
+                            </select>
+                        </div>
+                    </div>
 
                     <div class="form-group col-sm-12">
                         <div class="col-sm-12">

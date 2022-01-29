@@ -2,9 +2,10 @@ $(function () {
     $("#productName").focus();
     $("#member_status").hide();
     $("#member_status_red").hide();
+
+
 });
 $("#productName").autocomplete({
-
     source: function (request, response) {
         $.getJSON(base_url+"pos/get_product_list_by_branch", {term: request.term},
             response);

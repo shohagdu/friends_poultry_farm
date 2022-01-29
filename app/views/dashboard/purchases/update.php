@@ -22,7 +22,23 @@
                 <form action="" method="POST" id="purchaseInfoForm" role="form">
                     <div class="box-body">
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class=" col-md-4">
+                                <div class="form-group">
+                                    <label>Supplier Name</label>
+                                    <input type="text" autofocus style="border: 1px solid #6666ff" placeholder="Enter Supplier Name / Mobile No."
+                                           name="supplierName"
+                                           id="supplierNameSearch" value="<?php echo ((!empty($info->name))
+                                        ?$info->name:'').((!empty($info->mobile))
+                                        ?'['.$info->mobile.']':'') ?>"
+                                           class="form-control">
+                                    <input type="hidden"  value="<?php echo ((!empty($info->supplierID))
+                                        ?$info->supplierID:'') ?>" name="supplierNameSearchId" id="supplierNameSearchId"
+                                           class="form-control">
+
+
+                                </div>
+                            </div>
+                            <div class="col-sm-offset-2  col-md-3">
                                 <div class="form-group">
                                     <label>Stock No.</label>
                                     <input name="purchaseNo" value="<?php echo ((!empty($info->purchase_id))
@@ -43,12 +59,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Note</label>
-                                    <textarea name="note" colspan="2" id="note" type="text" placeholder="Enter Note...."  class="form-control"><?php echo ((!empty($info->note))?$info->note:'') ?></textarea>
-                                </div>
-                            </div>
+
                             
                         </div>
                         <div class="clearfix"></div>
@@ -71,7 +82,7 @@
                                         <th style="width: 10%;">#</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tableDynamic">
+                                <tbody id="tableDynamicPurchase">
                                     <?php
                                     $i=1;
                                     $total=0;
@@ -131,9 +142,22 @@
                         </div>
 
                     </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Note</label>
+                            <textarea name="note" colspan="2" id="note" type="text" placeholder="Enter Note...."  class="form-control"><?php echo ((!empty($info->note))?$info->note:'') ?></textarea>
+                        </div>
+                    </div>
                     <div class="box-footer text-right">
-                        <input type="hidden" name="update_id" value="<?php echo ((!empty($info->id))?$info->id:'') ?>">
-                        <button type="button" id="submit_btn"  class="btn btn-success btn-flat"  onclick="savePurchaseInfo()"><i class="glyphicon glyphicon-ok-sign"></i> Update</button>
+                        <div class="form-group">
+                            <div class="col-sm-8 text-left">
+                                <div id="show_error_save"></div>
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="hidden" name="update_id" value="<?php echo ((!empty($info->id))?$info->id:'') ?>">
+                                <button type="button" id="submit_btn"  class="btn btn-success btn-lg btn-block"  onclick="savePurchaseInfo()"><i class="glyphicon glyphicon-ok-sign"></i> Update</button>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>

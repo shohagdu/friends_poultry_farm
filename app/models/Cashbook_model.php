@@ -10,10 +10,14 @@ class Cashbook_model extends CI_Model {
         $this->ipAddress = $_SERVER['REMOTE_ADDR'];
     }
 
-    function accounts($accountID = '',$type='') {
+    function accounts($accountID = '',$type='',$status='') {
         $this->db->select('*');
         $this->db->from('tbl_pos_accounts');
-        $this->db->where_in('tbl_pos_accounts.softDelete', [0,1]);
+        if(empty($status)) {
+            $this->db->where_in('tbl_pos_accounts.softDelete', [0]);
+        }else{
+            $this->db->where_in('tbl_pos_accounts.softDelete', $status);
+        }
         if (!empty($accountID)) {
             $this->db->where('tbl_pos_accounts.accountID', $accountID);
         }
@@ -220,7 +224,7 @@ class Cashbook_model extends CI_Model {
         $this->db->where_in('type', [2, 3, 4, 5]);
         $query_results = $this->db->get();
         $results = $query_results->row();
-        if (($results->debit - $results->credit) > 0) {
+        if (($results->debit - $results->credit) != 0) {
             return number_format($results->debit - $results->credit,2,'.','');
         }else{
             return '0.00';
@@ -254,5 +258,84 @@ class Cashbook_model extends CI_Model {
             return $result[0]->balance;
         }
     }
+    public function showTransferInfo($postData){
+        $draw  = $postData['draw'];
+        $start = $postData['start'];
+        $rowperpage = $postData['length'];
+        $searchInfo = (!empty($postData['search']['value'])?$postData['search']['value']:'');
 
+        //all default searching
+        $search_arr[] = " transaction_info.type = 4 ";
+        $search_arr[] = " transaction_info.is_active = 1 ";
+
+        // Custom search filter
+        $expense_ctg        = !empty($postData['expenseCtg'])?$postData['expenseCtg']:'';
+        $bankID             = !empty($postData['bankID'])?$postData['bankID']:'';
+        $dateRange          = !empty($postData['dateRange'])?$postData['dateRange']:'';
+
+        if (!empty($expense_ctg)) {
+            $search_arr[] = " transaction_info.expense_ctg = " . $expense_ctg ;
+        }
+        if (!empty($bankID)) {
+            $search_arr[] = " sales_info.invoice_no = '" . $bankID."'" ;
+        }
+        if (!empty($dateRange)) {
+            $exp_date=explode("-",$dateRange);
+            $firstDate      =    $exp_date[0];
+            $toDate         =    $exp_date[1];
+            $search_arr[] = " transaction_info.payment_date >='". $firstDate."'" ;
+            $search_arr[] = " transaction_info.payment_date <='". $toDate."'" ;
+        }
+        if(count($search_arr) > 0){
+            $searchQuery = implode(" and ",$search_arr);
+        }
+        //return $searchQuery;
+        ## Total number of records without filtering
+        $totalRecords=$this->__get_count_row_inner_join('transaction_info',$searchQuery);
+        ## Total number of record with filtering
+        $totalRecordwithFilter=$this->__get_count_row_inner_join('transaction_info',$searchQuery);
+        ## Fetch records
+        $this->db->select("transaction_info.*,tbl_pos_accounts.accountName,tbl_pos_accounts.accountNumber,fromBankInfo.accountName as fromBankName,fromBankInfo.accountNumber as fromBankAccNo",
+            FALSE);
+        if($searchQuery != ''){
+            $this->db->where($searchQuery);
+        }
+        if($searchInfo != ''){
+            $this->db->like('transCode', $searchInfo);
+            $this->db->or_like('debit_amount', $searchInfo);
+        }
+
+        $this->db->join('tbl_pos_accounts', 'tbl_pos_accounts.accountID = transaction_info.bank_id', 'inner');
+        $this->db->join('transaction_info as fromTransferHistory', 'fromTransferHistory.parent_id = transaction_info.id', 'inner');
+        $this->db->join('tbl_pos_accounts as fromBankInfo', 'fromBankInfo.accountID = fromTransferHistory.bank_id', 'inner');
+
+        $this->db->order_by("transaction_info.id", "DESC");
+        $this->db->limit($rowperpage, $start);
+        $records = $this->db->get('transaction_info')->result();
+//         return $this->db->last_query();
+        $data = array();
+        $i=(!empty($start)?$start+1:1);
+        if(!empty($records)) {
+            foreach ($records as $key => $record) {
+                $data[] = $record;
+                $data[$key]->serial_no = (int) $i++;
+                $data[$key]->payment_date = (!empty($record->payment_date)?date('d M, Y',strtotime
+                ($record->payment_date)):'');
+                $data[$key]->is_active =  ($record->is_active==1)?"<span class='badge bg-green'>Active</span>":"<span class='badge bg-red'>Inactive</span>";
+                $data[$key]->action = ' 
+                <!--
+                <a href="'. base_url('pos/show/'.$record->id).'" class="btn btn-info  btn-xs"   ><i  class="glyphicon glyphicon-share-alt"></i> View</a> <a href="'. base_url('pos/update/'.sha1($record->id)).'"  class="btn btn-primary  btn-xs"  ><i  class="glyphicon glyphicon-pencil"></i> Edit</a> 
+                -->
+                <button onclick="deleteBankTransferInformation('.$record->id.')"  type="button" class="btn btn-danger  btn-sm"   ><i  class="glyphicon glyphicon-remove"></i> Delete</button> ';
+            }
+        }
+        ## Response
+        $response = array(
+            "draw" => intval($draw),
+            "iTotalRecords" => $totalRecords,
+            "iTotalDisplayRecords" => $totalRecordwithFilter,
+            "aaData" => $data
+        );
+        return $response;
+    }
 }

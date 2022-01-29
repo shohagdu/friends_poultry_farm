@@ -7,15 +7,17 @@ class Purchases_model extends CI_Model {
 
     function single_purchases_info($where=null)
     {
-        $this->db->select('purchase_info_stock_in.*,outlet_setup.name as outlet_name');
+        $this->db->select('purchase_info_stock_in.*,outlet_setup.name as outlet_name,supplier.name,supplier.id as supplierID,supplier.mobile,supplier.address');
         $this->db->from('purchase_info_stock_in');
         $this->db->join('outlet_setup', 'outlet_setup.id = purchase_info_stock_in.outlet_id', 'left');
+        $this->db->join('customer_shipment_member_info as supplier', 'supplier.id = purchase_info_stock_in.supplier_id', 'left');
+
         if(!empty($where)){
             $this->db->where($where);
         }
         $query_result = $this->db->get();
         if($query_result->num_rows()>0) {
-          return  $result = $query_result->row();
+          return  $query_result->row();
         }else{
             return false;
         }

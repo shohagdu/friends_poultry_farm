@@ -199,11 +199,30 @@
                                                 >
                                             </th>
                                         </tr>
+                                         <tr>
+                                            <th class="thStyleNew">Receive Account</th>
+                                            <th class="tdStyleNew">
+                                                <select id="receivedBankAcc"
+                                                       class="form-control"
+                                                       name="receivedBankAcc">
+                                                    <option value="">Select Bank Account</option>
+                                                    <?php if(!empty($accounts)){
+                                                        foreach ($accounts as $account) { ?>
+                                                            <option value="<?php echo $account->accountID; ?>">
+                                                                <?php echo $account->accountName; ?>
+                                                                <?php echo (!empty($account->accountNumber)?"["
+                                                                    .$account->accountNumber."]":''); ?>
+                                                            </option>
+                                                        <?php } } ?>
+                                                </select>
+                                            </th>
+                                        </tr>
+
                                         <tr>
                                             <td colspan="2" class="tdStyleNew">
                                                 <table class="table table-bordered">
                                                     <tr>
-                                                        <td rowspan="4"  class="paymentBy"> Payment By </td>
+                                                        <td rowspan="4"  class="paymentBy"> Received Method </td>
                                                         <td>
                                                             <label class="radio-inline"> <input type="checkbox" tabindex="-1"  id="cash"
                                                                                                 value="cash"
