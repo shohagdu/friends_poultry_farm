@@ -2177,3 +2177,18 @@ function addRowProductPurchase(id,purchasePrice,productInfo,productCode,salePric
     iStockIN++;
     return false;
 }
+
+function searchingAccountsStatementReports () {
+    $(".search_btn").attr("disabled", true);
+    $.ajax({
+        url:  base_url +"cashbook/accountsStatementAction/",
+        data: $('#accountsReportForm').serialize(),
+        type: "POST",
+        success: function (response) {
+            $(".search_btn").attr("disabled", false);
+            if(response!=''){
+                $(".showInfo").html(response);
+            }
+        }
+    });
+}

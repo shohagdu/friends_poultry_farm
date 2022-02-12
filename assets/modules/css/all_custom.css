@@ -75,6 +75,13 @@ address p {
     border: 1px solid #d0d0d0;
     text-align: center;
 }
+.width2per{
+    width:2% !important;
+}
+.width5per{
+    width:5% !important;
+}
+
 .width10per{
     width:10% !important;
 }

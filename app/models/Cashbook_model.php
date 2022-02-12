@@ -214,12 +214,15 @@ class Cashbook_model extends CI_Model {
         }
     }
 
-    public function bankavailableblance($bid)
+    public function bankavailableblance($bid,$endData=NUll)
     {
         $this->db->select('SUM(transaction_info.debit_amount) as debit, SUM(transaction_info.credit_amount) as credit',
             FALSE);
         $this->db->from('transaction_info');
         $this->db->where('bank_id', $bid);
+        if(!empty($endData)){
+            $this->db->where('payment_date < ', $endData);
+        }
         $this->db->where('is_active', 1);
         $this->db->where_in('type', [2, 3, 4, 5]);
         $query_results = $this->db->get();
@@ -231,18 +234,20 @@ class Cashbook_model extends CI_Model {
         }
     }
 
-    function accountBalance($accountID = '') {
-        $this->db->select('*');
+    function accountBalance() {
+        $this->db->select('accountID,accountName,accountType,accountNumber,accountBranchName,note,openingBal,softDelete');
         $this->db->from('tbl_pos_accounts');
-        $this->db->where('tbl_pos_accounts.softDelete', 0);
+        $this->db->where_in('tbl_pos_accounts.softDelete', [0,1]);
         $query_result = $this->db->get();
-        $result = $query_result->result();
-
-        foreach ($result as $key => $value) {
-            $result[$key]->balance = $this->askAccountBalanceRemain($value->accountID);
+        if($query_result->num_rows()>0) {
+            $result = $query_result->result();
+            foreach ($result as $key => $value) {
+                $result[$key]->balance = $this->bankavailableblance($value->accountID);
+            }
+            return $result;
+        }else{
+            return false;
         }
-
-        return $result;
     }
 
     private function askAccountBalanceRemain($accountID) {
@@ -337,5 +342,27 @@ class Cashbook_model extends CI_Model {
             "aaData" => $data
         );
         return $response;
+    }
+
+    public function getAccountStatement($where)
+    {
+        $this->db->select('*',FALSE);
+        $this->db->from('transaction_info');
+
+        if(!empty($where['firstDate'])){
+            $this->db->where("payment_date >=", $where['firstDate']);
+            $this->db->where("payment_date <=", $where['toDate']);
+        }
+        if(!empty($where['bank_id'])) {
+            $this->db->where('bank_id', $where['bank_id']);
+        }
+        $this->db->where('is_active', 1);
+        $this->db->where_in('type', [2, 3, 4, 5]);
+        $query_results = $this->db->get();
+        if (($query_results->num_rows()>0)) {
+            return   $query_results->result();
+        }else{
+            return false;
+        }
     }
 }

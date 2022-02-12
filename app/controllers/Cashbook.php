@@ -23,7 +23,7 @@ class Cashbook extends CI_Controller {
 
     function Accountindex() {
         $data = array();
-        $data['accounts'] = $this->CASHBOOK->accounts('','',[0,1]);
+        $data['accounts'] = $this->CASHBOOK->accountBalance();
         $view = array();
         $data['title'] = "Accounts Records";
         $view['content'] = $this->load->view('dashboard/cashbook/accounts/index', $data, TRUE);
@@ -267,4 +267,37 @@ class Cashbook extends CI_Controller {
             exit;
         }
     }
+
+    function accountsStatement($accountID) {
+        $param['bank_id']      =    $accountID;
+        $data = array();
+        $data['accountBalanceHistory'] = $this->CASHBOOK->getAccountStatement($param);
+        $view = array();
+        $data['title'] = "Balance Statement";
+        $view['content'] = $this->load->view('dashboard/cashbook/accounts/statement/accountsStatement', $data, TRUE);
+        $this->load->view('dashboard/index', $view);
+    }
+    function accountsStatementAction() {
+        $param=[];
+        $date=$this->input->post('searchingDate');
+        $accountID=$this->input->post('accountID');
+        if($date!=''){
+            $exp_date=explode("-",$date);
+            $param['firstDate']      =    (!empty($exp_date[0])?date('Y-m-d',strtotime($exp_date[0])):'');
+            $param['toDate']         =    (!empty($exp_date[1])?date('Y-m-d',strtotime($exp_date[1])):'');
+        }
+        if(!empty($param['firstDate'])){
+            $reportStartDate=$param['firstDate'];
+        }else{
+            $reportStartDate='';
+        }
+
+        $param['bank_id']      =    $accountID;
+        $data = array();
+        $data['carryOverHeadBal'] = $this->CASHBOOK->bankavailableblance($accountID,$reportStartDate);
+        $data['accountBalanceHistory'] = $this->CASHBOOK->getAccountStatement($param);
+        $this->load->view('dashboard/cashbook/accounts/statement/accountsStatementAction', $data);
+
+    }
+
 }
