@@ -1458,6 +1458,11 @@ function saveCustomerDueCollection() {
         }
     });
 }
+function updateCustomerDueCollection() {
+    $("#customerDueCollectionForm")[0].reset();
+    $("#show_label").html('Save');
+    $("#alert_error").hide();
+}
 
 $(document).on("click", ".deleteRowShipment", function (e) {
     if ($('#tableDynamicShipment tr').size() > 1) {

@@ -31,32 +31,32 @@
     </tr>
     <?php
     if(!empty($accountBalanceHistory)){
-    foreach ($accountBalanceHistory as $acBalance){
+        foreach ($accountBalanceHistory as $acBalance){
     ?>
-    <tr>
-        <td><?php echo $i++ ?></td>
-        <td><?php echo (!empty($acBalance->payment_date)?date('d M, Y',strtotime
-            ($acBalance->payment_date)):'')
-            ?></td>
-        <td><?php echo (!empty($acBalance->remarks)?strip_tags($acBalance->remarks):'').
-                (!empty ($acBalance->type)?" <> ".$acBalance->type:''). (!empty($acBalance->expense_ctg)? "<> ".$acBalance->expense_ctg:'') ?></td>
-        <td class="text-right"><?php echo $debit=(!empty($acBalance->debit_amount)
-                ?$acBalance->debit_amount:'0.00')
-            ?></td>
-        <td class="text-right"><?php echo $credit=(!empty($acBalance->credit_amount)
-                ?$acBalance->credit_amount:'0.00')
-            ?></td>
-        <td class="text-right">
-            <?php
-            echo $balance += (($balance+$debit)-$credit); ?>
-        </td>
-    </tr>
+        <tr>
+            <td><?php echo $i++ ?></td>
+            <td><?php echo (!empty($acBalance->payment_date)?date('d M, Y',strtotime
+                ($acBalance->payment_date)):'')
+                ?></td>
+            <td><?php echo (!empty($acBalance->remarks)?strip_tags($acBalance->remarks):'').
+                    (!empty ($acBalance->type)?" <> ".$acBalance->type:''). (!empty($acBalance->expense_ctg)? "<> ".$acBalance->expense_ctg:'') ?></td>
+            <td class="text-right"><?php echo $debit=(!empty($acBalance->debit_amount)
+                    ?$acBalance->debit_amount:'0.00')
+                ?></td>
+            <td class="text-right"><?php echo $credit=(!empty($acBalance->credit_amount)
+                    ?$acBalance->credit_amount:'0.00')
+                ?></td>
+            <td class="text-right">
+                <?php
+                echo $balance += (($balance+$debit)-$credit); ?>
+            </td>
+        </tr>
 
-    <?php
-    $tDebit+=$debit;
-    $tCredit+=$credit;
-    $tBalance+=$balance;
-    }
+        <?php
+        $tDebit+=$debit;
+        $tCredit+=$credit;
+        $tBalance+=$balance;
+        }
     }
     ?>
 

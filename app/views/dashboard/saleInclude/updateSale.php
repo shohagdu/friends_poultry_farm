@@ -222,6 +222,26 @@ include ('salesHeader.php')
                                     </th>
                                 </tr>
                                 <tr>
+                                    <th class="thStyleNew">Receive Account</th>
+                                    <th class="tdStyleNew">
+                                        <select id="receivedBankAcc"
+                                                class="form-control"
+                                                name="receivedBankAcc">
+                                            <option value="">Select Bank Account</option>
+                                            <?php if(!empty($accounts)){
+                                                foreach ($accounts as $account) { ?>
+                                                    <option value="<?php echo $account->accountID; ?>" <?php
+                                                    echo ((!empty($sales->paymentBankID) && $sales->paymentBankID
+                                                        == $account->accountID)?"selected":'')  ?>>
+                                                        <?php echo $account->accountName; ?>
+                                                        <?php echo (!empty($account->accountNumber)?"["
+                                                            .$account->accountNumber."]":''); ?>
+                                                    </option>
+                                                <?php } } ?>
+                                        </select>
+                                    </th>
+                                </tr>
+                                <tr>
                                     <td colspan="2" class="tdStyleNew">
                                         <?php
                                             $paymentBy=(!empty($sales->payment_by)?json_decode($sales->payment_by,true):'');

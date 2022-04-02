@@ -162,6 +162,7 @@ class Pos extends CI_Controller
             }else{
                 echo json_encode(['status'=>'error','message'=>'Fetch a problem, data not update','redirect_page'=>$redierct_page]);exit;
             }
+
         }else{
 
             $sales_info=[
@@ -431,6 +432,11 @@ class Pos extends CI_Controller
         $this->db->where('stock_type', 2);
         $this->db->update("stock_info", $info);
 
+        $this->db->where('sales_id', $id);
+        $this->db->update("transaction_info", $info);
+
+
+
         $message = 'Successfully Delete this Information';
 
         $this->db->trans_complete();
@@ -451,9 +457,9 @@ class Pos extends CI_Controller
             echo $this->POS->suggestInvoiceNumber($q);
         }
     }
-    function update($id)
-    {
-        $data['sales'] = $this->POS->get_single_sales_infoSha1($id);
+    function update($id){
+        $data['sales']      = $this->POS->get_single_sales_infoSha1($id);
+        $data['accounts']   = $this->CASHBOOK->accounts();
         $this->load->view('dashboard/saleInclude/updateSale', $data);
     }
 }

@@ -25,7 +25,7 @@
                                         </div>
                                         <div class="col-sm-4 col-xs-8 text-center" style="padding-top:5px" >
                                             <div class="form-check">
-                                                <input class="form-check-input" tabindex="-1" checked type="checkbox" value="1" name="allAreRunningCustomer" id="allAreRunningCustomer">
+                                                <input class="form-check-input" tabindex="-1"  type="checkbox" value="1" name="allAreRunningCustomer" id="allAreRunningCustomer">
                                                 <label class="form-check-label" for="allAreRunningCustomer">
                                                    All are  Running Customer
                                                 </label>

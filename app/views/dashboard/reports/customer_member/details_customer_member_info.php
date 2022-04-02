@@ -101,14 +101,15 @@
                                                 <?php } } ?>
                                             </table>
                                     </td>
+                                    <td class="text-right"><?php echo !empty($row->credit_amount)
+                                            ?number_format($row->credit_amount,2):'0.00';
+                                        $tCredit+=$row->credit_amount; ?></td>
                                     <td class="text-right"><?php echo !empty($row->debit_amount)
                                             ?number_format($row->debit_amount,2):'0.00'; $tDebit+=$row->debit_amount;
                                     ?></td>
-                                    <td class="text-right"><?php echo !empty($row->credit_amount)
-                                            ?number_format($row->credit_amount,2):'0.00';
-                                            $tCredit+=$row->credit_amount; ?></td>
-                                    <td class="text-right"><?php echo (!empty($tDebit-$tCredit)?number_format
-                                        ($tDebit-$tCredit,2):'0.00')
+
+                                    <td class="text-right"><?php echo (!empty($tCredit-$tDebit)?number_format
+                                        ($tCredit-$tDebit,2):'0.00')
                                         ?></td>
                                     <td class="no-print">
                                         <?php

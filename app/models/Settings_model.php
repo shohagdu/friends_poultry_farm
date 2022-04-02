@@ -372,7 +372,7 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
         ## Total number of record with filtering
         $totalRecordwithFilter=$this->__get_count_row('customer_shipment_member_info',$searchQuery);
         ## Fetch records
-        $this->db->select("customer_shipment_member_info.*,outlet_setup.name as outlet_name,outlet_setup.address as outlet_address ,sum(t.debit_amount) as total_debit,sum(t.credit_amount)  as total_credit,(sum(t.debit_amount) - sum(t.credit_amount)) as current_due",false);
+        $this->db->select("customer_shipment_member_info.*,outlet_setup.name as outlet_name,outlet_setup.address as outlet_address ,sum(t.debit_amount) as total_debit,sum(t.credit_amount)  as total_credit,(  sum(t.credit_amount) - sum(t.debit_amount) ) as current_due",false);
         if($searchQuery != ''){
             $this->db->where($searchQuery);
         }
@@ -564,7 +564,7 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
     }
 
     public function customer_member_current_due($where){
-            $this->db->select("sum(t.debit_amount) as total_debit,sum(t.credit_amount)  as total_credit,(sum(t.debit_amount) - sum(t.credit_amount)) as balance");
+            $this->db->select("sum(t.debit_amount) as total_debit,sum(t.credit_amount)  as total_credit,(sum(t.credit_amount) - sum(t.debit_amount)) as balance");
             $this->db->from('transaction_info as t');
             if(!empty($where)) {
                 $this->db->where($where);
