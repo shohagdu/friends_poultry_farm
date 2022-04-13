@@ -372,7 +372,7 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
         ## Total number of record with filtering
         $totalRecordwithFilter=$this->__get_count_row('customer_shipment_member_info',$searchQuery);
         ## Fetch records
-        $this->db->select("customer_shipment_member_info.*,outlet_setup.name as outlet_name,outlet_setup.address as outlet_address ,sum(t.debit_amount) as total_debit,sum(t.credit_amount)  as total_credit,(  sum(t.credit_amount) - sum(t.debit_amount) ) as current_due",false);
+        $this->db->select("customer_shipment_member_info.*,outlet_setup.name as outlet_name,outlet_setup.address as outlet_address ,sum(t.debit_amount) as total_debit,sum(t.credit_amount)  as total_credit,(sum(t.credit_amount) - sum(t.debit_amount)) as current_due",false);
         if($searchQuery != ''){
             $this->db->where($searchQuery);
         }
@@ -390,8 +390,9 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
                 $data[$key]->serial_no = (int) $i++;
                 $data[$key]->is_active =  ($record->is_active==1)?"<span class='badge bg-green'>Active</span>":"<span class='badge bg-red'>Inactive</span>";
                 if($record->type==1) {
-                    $data[$key]->current_due = (!empty($record->current_due)) ? "<span class='badge' style='background-color:red;'>"
-                        . $record->current_due . "</span>" : "<span class='badge'>0.00</span>";
+                    $data[$key]->current_due = (!empty($record->total_credit - $record->total_debit)) ? "<span class='badge' style='background-color:red;'>"
+                        . number_format(($record->total_credit - $record->total_debit),2) . "</span>" : "<span class='badge'>0.00</span>";
+
                     $data[$key]->action = '<button  class="btn btn-primary  btn-sm" data-toggle="modal" onclick="updateCustomerMemberInfo(' . $record->id . ' )" data-target="#myModal"><i  class="glyphicon glyphicon-pencil"></i> Edit</button> <a  class="btn btn-info  btn-sm"  href="' . base_url('reports/details_customer_member_info/' . $record->id) . ' " ><i  class="glyphicon glyphicon-share-alt"></i> Ledger</a> ';
                 }else{
                     // This is for member
@@ -442,11 +443,12 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
     }
     function get_single_customer_member_info($where=NULL)
     {
-        $this->db->select('*');
+        $this->db->select('customer_shipment_member_info.*,transaction_info.type,transaction_info.credit_amount');
         $this->db->from('customer_shipment_member_info');
         if(!empty($where)) {
             $this->db->where($where);
         }
+        $this->db->join('transaction_info','transaction_info.customer_member_id = customer_shipment_member_info.id AND transaction_info.is_opening_balance=2 AND transaction_info.type=10','left');
         $query_result = $this->db->get();
         if($query_result->num_rows()>0) {
             return $query_result->row();
@@ -564,12 +566,13 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
     }
 
     public function customer_member_current_due($where){
-            $this->db->select("sum(t.debit_amount) as total_debit,sum(t.credit_amount)  as total_credit,(sum(t.credit_amount) - sum(t.debit_amount)) as balance");
+            $this->db->select("sum(t.debit_amount) as total_debit,sum(t.credit_amount)  as total_credit ,(SUM(IF(t.credit_amount != 'NULL', t.credit_amount, 0))-SUM(IF(t.debit_amount != 'NULL', t.debit_amount, 0))) as balance",false);
             $this->db->from('transaction_info as t');
             if(!empty($where)) {
                 $this->db->where($where);
             }
             $this->db->where("t.is_active",1);
+            $this->db->group_by("t.customer_member_id");
             $query_result = $this->db->get();
             if($query_result->num_rows()>0) {
                 $data= $query_result->row();
@@ -602,16 +605,23 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
         $rowperpage = $postData['length'];
 
         //all default searching
-        $search_arr[] = "  transaction_info.type = 3 ";
+
         $search_arr[] = "  transaction_info.is_active = 1 ";
 //        $search_arr[] = "  transaction_info.outletID =  ".$this->outletID;
 
         // Custom search filter
-        $customerID = !empty($postData['customerID'])?$postData['customerID']:'';
+        $customerID         = !empty($postData['customerID'])?$postData['customerID']:'';
+        $transactionType    = !empty($postData['transactionType'])?$postData['transactionType']:'';
 
         if (!empty($customerID)) {
             $search_arr[] = " transaction_info.customer_member_id = " . $customerID ;
         }
+        if (!empty($transactionType)) {
+            $search_arr[] = " transaction_info.type = " . $transactionType ;
+        }else{
+            $search_arr[] = "  transaction_info.type IN (3,11,12) ";
+        }
+
 
 
         if(count($search_arr) > 0){
@@ -634,13 +644,18 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
         $records = $this->db->get('transaction_info')->result();
         // return $this->db->last_query();
         $data = array();
-        $i=1;
+        $i=(!empty($start)?$start+1:1);
         if(!empty($records)) {
+            $transType=self::transactionType();
             foreach ($records as $key => $record) {
                 $data[] = $record;
-                $data[$key]->serial_no = (int) $i++;
-                $data[$key]->is_active =  ($record->is_active==1)?"<span class='badge bg-green'>Active</span>":"<span class='badge bg-red'>Inactive</span>";
-                $data[$key]->action = '<button  class="btn btn-primary  btn-sm" data-toggle="modal" onclick="updateOutletInfo('.$record->id.' )" data-target="#myModal"><i  class="glyphicon glyphicon-pencil"></i> Edit</button> <a href="'. base_url('settings/due_collection_vouchar/'.$record->id).'" class="btn btn-info  btn-sm"   ><i  class="glyphicon glyphicon-share-alt"></i> view</a>';
+                $data[$key]->serial_no      = (int) $i++;
+                $data[$key]->transType      = (!empty($transType[$record->type])?$transType[$record->type]:'-');
+                $data[$key]->amount         = !empty($record->debit_amount)?$record->debit_amount:(!empty
+                ($record->credit_amount)?$record->credit_amount:'');
+                $data[$key]->payment_date   = date('d M, Y',strtotime($record->payment_date));
+                $data[$key]->is_active      =  ($record->is_active==1)?"<span class='badge bg-green'>Active</span>":"<span class='badge bg-red'>Inactive</span>";
+                $data[$key]->action         = '<button  class="btn btn-primary  btn-sm" data-toggle="modal" onclick="updateCustomerTransInfo('.$record->id.' )" data-target="#myModal"><i  class="glyphicon glyphicon-pencil"></i> Edit</button> <a href="'. base_url('settings/customerTransVoucher/'.$record->id).'" class="btn btn-info  btn-sm"   ><i  class="glyphicon glyphicon-share-alt"></i> view</a>';
 
 
             }
@@ -653,6 +668,23 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
             "aaData" => $data
         );
         return $response;
+    }
+    public function transactionType(){
+       // 1 = Sales Total Amt (dr), 2 = when sales then payment (Cr), 3 = Due Collection (Cr), 4 = bank Add (Dr), 5 = Bank Cr (Deduct) 6 = Supplier bill Create (Cr), 7 = Supplier Payment (Dr) (Bank Cr), 8 = Expense (Dr) [bank CR]
+       return [
+          1 => 'Sales Total Amt', // Dr
+          2 => 'Payment (When Sales)', // Cr
+          3 => 'Due Collection', // Cr
+          4 => 'Bank Balance Add', //Dr
+          5 => 'Bank Balance Deduct', //Cr
+          6 => 'Supplier Bill Generate', // Cr
+          7 => 'Supplier Payment', // Dr
+          8 => 'Expense', // Dr // Bank Cr
+          9 => '',
+          10=> 'Opening Due', // Dr
+          11=> 'Cash Deposit to Customer', // Dr
+          12=> 'Closing Discount', // Cr
+        ];
     }
 
 

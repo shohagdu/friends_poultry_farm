@@ -18,6 +18,7 @@ class Settings extends CI_Controller
         $this->load->model('Settings_model', 'SETTINGS', TRUE);
         $this->load->model('Products_model', 'PRODUCTS', TRUE);
         $this->load->model('Common_model', 'COMMON_MODEL', TRUE);
+        $this->load->model('Reports_model', 'REPORT', TRUE);
 
 
         $user_outlet= $this->session->userdata('outlet_data');
@@ -472,14 +473,14 @@ class Settings extends CI_Controller
         $data['title']='Customer';
         $data['type']=1;
         $data['redierct_page']='settings/customer_info';
-        $data['outlet_info']= $this->SETTINGS->outlet_info();
+        $data['outlet_info']= [];
         $view['content'] = $this->load->view('dashboard/settings/customer_member_Info/customer_member', $data, TRUE);
         $this->load->view('dashboard/index', $view);
     }
     public  function customer_due_collection(){
         $data = array();
         $view = array();
-        $data['title']='Customer Due Collection';
+        $data['title']='Customer Transaction';
         $data['redierct_page']='settings/customer_due_collection';
         $data['outlet_info']= $this->SETTINGS->outlet_info();
         $data['accounts']            = $this->SETTINGS->account();
@@ -520,13 +521,28 @@ class Settings extends CI_Controller
             );
             $this->db->insert("customer_shipment_member_info", $info);
             $customer_id=$this->db->insert_id();
+
+
+            $payment_transaction=[
+                'customer_member_id'        =>  $customer_id,
+                'credit_amount'             =>  $openingDue,
+                'payment_date'              =>  date('Y-m-d'),
+                'type'                      =>  10,
+                'remarks'                   =>  (!empty($remarks)?$remarks:''),
+                'is_opening_balance'        =>  2,
+                'created_by'                =>  $this->userId,
+                'created_time'              =>  $this->dateTime,
+                'created_ip'                =>  $this->ipAddress,
+            ];
+            $this->db->insert("transaction_info",$payment_transaction);
+
             $message='Successfully Save Information';
             $customer_info=[
-              'id'=>$customer_id,
-              'name'=>$name,
-              'mobile'=>$mobile,
-              'email'=>$email,
-              'address'=>$address
+                'id'=>$customer_id,
+                'name'=>$name,
+                'mobile'=>$mobile,
+                'email'=>$email,
+                'address'=>$address
             ];
         }else{
             $info = array(
@@ -545,6 +561,17 @@ class Settings extends CI_Controller
 
             $this->db->where('id',$upId);
             $this->db->update("customer_shipment_member_info", $info);
+
+            $payment_transaction=[
+                'credit_amount'             =>  $openingDue,
+                'remarks'                   =>  (!empty($remarks)?$remarks:''),
+                'updated_by'                =>  $this->userId,
+                'updated_time'              =>  $this->dateTime,
+                'updated_ip'                =>  $this->ipAddress,
+            ];
+            $this->db->where(['customer_member_id'=>$upId,'type'=>10,'is_opening_balance'=>2]);
+            $this->db->update("transaction_info",$payment_transaction);
+
             $message='Successfully Update Information';
         }
 
@@ -612,7 +639,7 @@ class Settings extends CI_Controller
     {
         extract($_POST);
         if(!empty($id)) {
-            $info = $this->SETTINGS->get_single_customer_member_info(['id'=>$id]);
+            $info = $this->SETTINGS->get_single_customer_member_info(['customer_shipment_member_info.id'=>$id]);
             if(!empty($info)){
                 echo json_encode(['status'=>'success','message'=>'successfully data found','data'=>$info]);exit;
             }else{
@@ -783,43 +810,54 @@ class Settings extends CI_Controller
 
     public function save_customer_due_collection(){
         extract($_POST);
+
         $payment_byInfo=[];
         if(!empty($payment_by)){
             foreach ($payment_by as $key=>$payCtg){
-                $payment_byInfo[$payCtg]=$payment_ctg_amount[$key];
+                $payment_byInfo[$payCtg]=number_format($payment_ctg_amount[$key],2,'.','');
             }
         }
         if(empty($customer_id)){
             echo json_encode(['status'=>'error','message'=>'Customer Name is required','data'=>'']);exit;
-        }if(empty($accountID)){
+        }
+        if(empty($transactionType)){
+            echo json_encode(['status'=>'error','message'=>'Transaction Type is required','data'=>'']);exit;
+        }
+
+        if(empty($accountID) && ($transactionType == 3 || $transactionType == 11) ){
             echo json_encode(['status'=>'error','message'=>'Accounts Name is required','data'=>'']);exit;
         }
-        if(empty($payment_now)){
+        if(empty($payment_now) || $payment_now=='0.00' || $payment_now <= 0 ){
             echo json_encode(['status'=>'error','message'=>'Payment Amount is required','data'=>'']);exit;
         }
         if(empty($payment_date)){
             echo json_encode(['status'=>'error','message'=>'Payment Date is required','data'=>'']);exit;
         }
-        if(empty($payment_byInfo)){
-            echo json_encode(['status'=>'error','message'=>'Minimum one pyament mode  is required','data'=>'']);exit;
+        if(empty($payment_byInfo) && ($transactionType == 3 )){
+            echo json_encode(['status'=>'error','message'=>'Minimum one payment mode  is required','data'=>'']);exit;
         }
-
-
-
         if(empty($upId)){
             $this->db->trans_start();
             $payment_transaction=[
+                'transCode'                 =>  time(),
                 'customer_member_id'        =>  $customer_id,
-                'payment_by'                =>  (!empty($payment_byInfo)?json_encode($payment_byInfo):''),
-                'debit_amount'              =>  $payment_now,
-                'bank_id'                   =>  $accountID,
                 'payment_date'              =>  (!empty($payment_date)?date('Y-m-d',strtotime($payment_date)):''),
-                'type'                      =>  3,
+                'type'                      =>  $transactionType,
                 'remarks'                   =>  $remarks,
                 'created_by'                =>  $this->userId,
                 'created_time'              =>  $this->dateTime,
                 'created_ip'                =>  $this->ipAddress,
             ];
+            if($transactionType==3){ // Due Collection
+                $payment_transaction['payment_by']      = (!empty($payment_byInfo)?json_encode($payment_byInfo):'');
+                $payment_transaction['debit_amount']    = $payment_now;
+                $payment_transaction['bank_id']         = $accountID;
+            }elseif($transactionType==11){ //Cash Deposit to Customer
+                $payment_transaction['credit_amount']    = $payment_now;
+                $payment_transaction['bank_id']          = $accountID;
+            }elseif($transactionType==12){ //Closing Discount
+                $payment_transaction['debit_amount']    = $payment_now;
+            }
             $this->db->insert("transaction_info",$payment_transaction);
 
             $redierct_page='settings/customer_due_collection';
@@ -838,21 +876,31 @@ class Settings extends CI_Controller
         }else{
             // when update
             $this->db->trans_start();
-            $data=[
+
+            $payment_transaction=[
                 'customer_member_id'        =>  $customer_id,
-                'payment_by'                =>  (!empty($payment_byInfo)?json_encode($payment_byInfo):''),
-                'debit_amount'              =>  $payment_now,
-                'bank_id'                   =>  $accountID,
                 'payment_date'              =>  (!empty($payment_date)?date('Y-m-d',strtotime($payment_date)):''),
+                'type'                      =>  $transactionType,
                 'remarks'                   =>  $remarks,
                 'updated_by'                =>  $this->userId,
                 'updated_time'              =>  $this->dateTime,
                 'updated_ip'                =>  $this->ipAddress,
             ];
-            $this->db->where("id",$upId);
-            $this->db->update("shipment_stock_info",$data);
+            if($transactionType==3){ // Due Collection
+                $payment_transaction['payment_by']      = (!empty($payment_byInfo)?json_encode($payment_byInfo):'');
+                $payment_transaction['debit_amount']    = $payment_now;
+                $payment_transaction['bank_id']         = $accountID;
+            }elseif($transactionType==11){ //Cash Deposit to Customer
+                $payment_transaction['credit_amount']    = $payment_now;
+                $payment_transaction['bank_id']          = $accountID;
+            }elseif($transactionType==12){ //Closing Discount
+                $payment_transaction['debit_amount']    = $payment_now;
+            }
 
-            $redierct_page='shipment_info/shipment_setup';
+            $this->db->where("id",$upId);
+            $this->db->update("transaction_info",$payment_transaction);
+
+            $redierct_page='settings/customer_due_collection';
             $this->db->trans_complete();
 
             if($this->db->trans_status()===true){
@@ -865,6 +913,27 @@ class Settings extends CI_Controller
             }
 
         }
+    }
+    public function showCustomerTransInfoViaID(){
+        extract($_POST);
+        if(!empty($id)){
+            $data=$this->REPORT->get_single_transaction_info(['transaction_info.id'=>$id]);
+            if(!empty($data)){
+                echo json_encode(['status'=>'success','message'=>'Data Found Successfully','data'=>$data]); exit;
+            }else{
+                echo json_encode(['status'=>'error','message'=>'No Data Found ','data'=>'']); exit;
+            }
+        }
+    }
+    public  function customerTransVoucher($transID){
+        $data = array();
+        $view = array();
+        $data['title']              = 'Customer Voucher';
+        $data['transactionInfo']    = $this->REPORT->get_single_transaction_info(['transaction_info.id'=>$transID]);
+        $data['transactionType']    = $this->SETTINGS->transactionType();
+
+        $view['content']            = $this->load->view('dashboard/settings/customer_member_Info/customerTransVoucher', $data, TRUE);
+        $this->load->view('dashboard/index', $view);
     }
 
 

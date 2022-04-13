@@ -15,16 +15,7 @@
                 <div class="box-body">
                     <div class="form-group">
                         <div class="row">
-                            <div class="col-sm-2">
-                                <label>Outlet</label>
-                                <div class="clearfix"></div>
-                                <select id="outletID" class="form-control" required style="width: 100%;">
-                                    <option value="">Select Outlet</option>
-                                    <?php if(!empty($outlet_info)){ foreach ($outlet_info as $outlet) { ?>
-                                        <option value="<?php echo $outlet->id; ?>"><?php echo $outlet->name; ?></option>
-                                    <?php } }?>
-                                </select>
-                            </div>
+
                             <div class="col-sm-4">
                                 <label>Customer Name</label>
                                 <div class="clearfix"></div>
@@ -75,21 +66,6 @@
                     <h4 class="modal-title"><?php echo (!empty($title)?$title:'') ?> Information</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="clearfix"></div>
-                    <!--
-                    <div class="form-group col-sm-12">
-                        <label class="col-sm-3 text-right">
-                           Outlet
-                        </label>
-                        <div class="col-sm-9">
-                            <select class="form-control" required name="outlet_id"  id="outlet_id">
-                                <option value="">Select Outlet</option>
-                                <?php if(!empty($outlet_info)){ foreach ($outlet_info as $outlet) { ?>
-                                    <option value="<?php echo $outlet->id; ?>"><?php echo $outlet->name; ?></option>
-                                <?php } }?>
-                            </select>
-                        </div>
-                    </div>-->
                     <div class="form-group col-sm-12">
                         <label class="col-sm-3 text-right">
                             Name
@@ -136,8 +112,6 @@
                                    id="customer_date_of_birth">
                         </div>
                     </div>
-
-
                     <div class="form-group col-sm-12">
                         <label class="col-sm-3 text-right">
                             Remarks
@@ -145,6 +119,15 @@
                         <div class="col-sm-9">
                             <textarea class="form-control" name="remarks" placeholder="Remarks"
                                       id="remarks"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-12">
+                        <label class="col-sm-3 text-right">
+                             Opening Due
+                        </label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control " name="openingDue" placeholder="Opening Due"
+                                   id="openingDue">
                         </div>
                     </div>
                     <div class="form-group col-sm-12">

@@ -536,7 +536,7 @@ class Shipment_info extends CI_Controller {
     public  function details_member_info($id){
         $data = array();
         $view = array();
-        $data['customer_info']=$this->SETTINGS->get_single_customer_member_info(['id'=>$id]);
+        $data['customer_info']=$this->SETTINGS->get_single_customer_member_info(['customer_shipment_member_info.id'=>$id]);
         $data['title']=(($data['customer_info']->type==1)?"Customer Ledger":"Member Ledger"). ' Information';
         $data['info']= $this->SHIPMENT->shipment_stock_details(['shipment_stock_details.member_id'=>$id,'shipment_stock_details.is_active'=>1]);
         $view['content'] = $this->load->view('dashboard/reports/customer_member/details_member_info', $data, TRUE);

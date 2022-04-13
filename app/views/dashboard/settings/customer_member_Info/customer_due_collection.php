@@ -6,23 +6,34 @@
             <div class="box">
                 <div class="box-header">
                     <h3 class="box-title"><?php echo (!empty($title)?$title:'') ?></h3>
-
+                    <a class="btn btn-warning pull-right" style="margin-left: 5px" href="<?php echo base_url('settings/customer_due_collection')
+                    ?>"><i
+                                class="glyphicon glyphicon-refresh"></i> Refresh
+                    </a>
                     <button class="btn btn-primary pull-right" data-toggle="modal" onclick="addCustomerDueCollection()"
                             data-target="#myModal"><i
                             class="glyphicon glyphicon-plus"></i> Add New
                     </button>
+
+
                 </div>
                 <form action="" method="post">
 
                     <div class="form-group">
                         <div class="col-sm-3">
-                            <label>Member Name </label>
+                            <label>Customer</label>
                             <div class="clearfix"></div>
-                            <input type="text" id="member_name_1" class=" memberName form-control"
-                                   placeholder="Enter Member Name / Mobile / Address"  >
-                            <input type="hidden" id="memberid_1" class="  form-control"  >
-
-                            </input>
+                            <select id="searchCustomerId" class="customerNameDD" ></select>
+                        </div>
+                        <div class="col-sm-3">
+                            <label>Transaction Type </label>
+                            <div class="clearfix"></div>
+                            <select  class="form-control" id="searchTransactionType">
+                                <option value="">Select Transaction Type</option>
+                                <option value="3">Collection from Customer (কাস্টমার থেকে টাকা গ্রহণ) </option>
+                                <option value="11">Deposit to Customer (কাস্টমারকে টাকা প্রদান) </option>
+                                <option value="12">Closing Discount (কাস্টমারকে ছাড় দেওয়া) </option>
+                            </select>
                         </div>
                     </div>
                 </form>
@@ -34,10 +45,12 @@
                         <thead>
                         <tr>
                             <th>S/L</th>
-                            <th>Member Name </th>
+                            <th>Trans. Code </th>
+                            <th>Customer Name </th>
+                            <th>Trans. Type </th>
                             <th>Date</th>
-                            <th>Collection Amt</th>
-                            <th>Note</th>
+                            <th> Amount</th>
+                            <th>Remarks</th>
                             <th></th>
                         </tr>
                         </thead>
@@ -57,7 +70,7 @@
     </div>
 </section>
 <div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <form action="" method="post" id="customerDueCollectionForm" class="form-horizontal"
               enctype="multipart/form-data">
             <div class="modal-content">
@@ -68,18 +81,32 @@
                 <div class="modal-body">
                     <div class="form-group col-sm-12">
                         <label class="col-sm-3 text-right">
+                            Transaction Type
+                        </label>
+                        <div class="col-sm-9">
+                            <select name="transactionType" class="form-control" id="transactionType">
+                                <option value="">Select Transaction Type</option>
+                                <option value="3">Collection from Customer (কাস্টমার থেকে টাকা গ্রহণ) </option>
+                                <option value="11">Deposit to Customer (কাস্টমারকে টাকা প্রদান) </option>
+                                <option value="12">Closing Discount (কাস্টমারকে ছাড় দেওয়া) </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-sm-12">
+                        <label class="col-sm-3 text-right">
                             Customer Name
                         </label>
                         <div class="col-sm-9">
-                            <input type="text" id="customerName_11" class="customerName form-control"
-                                   placeholder="Enter Customer Name / Mobile / Address"  >
+                            <select id="customerIdDD" class="customerNameDD" name="customer_id"
+                                    required="required"></select>
 
-                            <input type="hidden" name="customer_id" id="customerID_11" class="  form-control"  >
                         </div>
                     </div>
-                    <div class="form-group col-sm-12">
+
+                    <div class="form-group col-sm-12 totalDueAmountDiv">
                         <label class="col-sm-3 text-right">
-                            Due Amount
+                           Total Due Amount
                         </label>
                         <div class="col-sm-9">
                             <input type="text" readonly class="form-control"
@@ -88,12 +115,12 @@
                                    id="due_amount">
                         </div>
                     </div>
-                    <div class="form-group col-sm-12">
+                    <div class="form-group col-sm-12 transTypeChange" style="display: none">
                         <label class="col-sm-3 text-right">
                             Account Name
                         </label>
                         <div class="col-sm-9">
-                            <select name="accountID" class="form-control select2" style="width: 100%;">
+                            <select name="accountID" id="accountID" class="form-control select2" style="width: 100%;">
                                 <option value="">Select Account</option>
                                 <?php if(!empty($accounts)){ foreach ($accounts as $account) { ?>
                                     <option value="<?php echo $account->accountID; ?>"><?php echo $account->accountName; ?></option>
@@ -102,11 +129,11 @@
                         </div>
                     </div>
 
-                    <div class="form-group col-sm-12">
+                    <div class="form-group col-sm-12 paymentType" style="display: none">
                         <div class="col-sm-12">
                             <table class="table table-bordered">
                                 <tr>
-                                    <th rowspan="4"  class="paymentBy text-right"> Payment By </th>
+                                    <th rowspan="4"  class="paymentBy text-right"> Received By </th>
                                     <td>
                                         <label class="radio-inline"> <input type="checkbox" id="cash"
                                                                             value="cash"
@@ -166,7 +193,7 @@
                                     <td>
                                         <label class="radio-inline"> <input type="checkbox" id="online"
                                                                             onclick="isCheckedById(this)"
-                                                                            value="online_payment"
+                                                                            value="online"
                                                                             name="payment_by[3]"
                                             ></label>
                                     </td>
@@ -183,9 +210,9 @@
                             </table>
                         </div>
                     </div>
-                    <div class="form-group col-sm-12">
+                    <div class="form-group col-sm-12" >
                         <label class="col-sm-3 text-right">
-                            Payment Now
+                            <span class="transAmount">Amount</span>
                         </label>
                         <div class="col-sm-9">
                             <input type="text" readonly class="form-control"
@@ -194,7 +221,7 @@
                                    id="paidNow">
                         </div>
                     </div>
-                    <div class="form-group col-sm-12">
+                    <div class="form-group col-sm-12 currentDueAmountDiv">
                         <label class="col-sm-3 text-right">
                             Current Due
                         </label>

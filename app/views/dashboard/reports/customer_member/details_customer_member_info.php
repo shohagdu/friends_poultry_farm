@@ -51,28 +51,32 @@
                         <tr>
                             <th> SL</th>
                             <th> Date</th>
-                            <th class="width20per"> Payment By</th>
-                            <th> Debit</th>
-                            <th> Credit</th>
+                            <th class="width20per"> Remarks</th>
+                            <th> Debit (Sales+Opening Due+Cash Deposite)</th>
+                            <th> Credit (Collection+Closing Discount)</th>
                             <th> Balance </th>
                             <th class="no-print" style="width: 10%;">Action</th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php
+                        $i=1;
+                        $tDebit     =   '0.00';
+                        $tCredit    =   '0.00';
                         if(!empty($info)){
-                            $i=1;
-                            $tDebit='0.00';
-                            $tCredit='0.00';
                             foreach ($info as $row) {
                                 ?>
                                 <tr>
                                     <td><?php echo $i++; ?></td>
-                                    <td class="text-left"><?php echo (!empty($row->sales_date)?date('d M, Y',strtotime
-                                        ($row->sales_date)):'');
-                                        ?></td>
                                     <td class="text-left">
-                                        <?php  $paymentBy=(!empty($row->payment_by)?json_decode
+                                        <?php
+                                            echo (!empty($row->sales_date)?date('d M, Y',strtotime($row->sales_date)):(!empty($row->payment_date)?date('d M, Y
+                                            ',strtotime($row->payment_date)):''));
+                                        ?>
+                                    </td>
+                                    <td class="text-left">
+                                        <?php
+                                        $paymentBy=(!empty($row->payment_by)?json_decode
                                         ($row->payment_by,true):'');  ?>
                                         <table class="table-style width100per"  >
                                             <?php
@@ -100,6 +104,10 @@
                                                     </tr>
                                                 <?php } } ?>
                                             </table>
+                                        <?php
+                                        echo (!empty($transactionType[$row->type])?$transactionType[$row->type]:'');
+                                        echo (!empty($row->remarks)?" - ".$row->remarks:'')
+                                        ?>
                                     </td>
                                     <td class="text-right"><?php echo !empty($row->credit_amount)
                                             ?number_format($row->credit_amount,2):'0.00';

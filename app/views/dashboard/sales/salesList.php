@@ -15,10 +15,8 @@
             <div class="row" style="margin-bottom:5px;">
                 <form action="" method="post">
                     <div class="col-sm-4 col-xs-8 clearfix">
-                        <input type="text" id="customerName_11" class="customerName form-control"
-                               placeholder="Searching by Customer Name Or Mobile "  >
-
-                        <input type="hidden" name="customer_id" id="customerID_11" class="  form-control"  >
+                        <select id="customerName_11" class="customerNameDD" name="customer_id"
+                                required="required"></select>
                     </div>
                     <div class="col-sm-2 col-xs-4 clearfix">
                         <input type="text" name="salesID" id="salesID" placeholder="Invoice No"
