@@ -525,7 +525,7 @@ class Settings extends CI_Controller
 
             $payment_transaction=[
                 'customer_member_id'        =>  $customer_id,
-                'credit_amount'             =>  $openingDue,
+                'credit_amount'             =>  (!empty($openingDue)?$openingDue:'0.00'),
                 'payment_date'              =>  date('Y-m-d'),
                 'type'                      =>  10,
                 'remarks'                   =>  (!empty($remarks)?$remarks:''),
@@ -562,15 +562,32 @@ class Settings extends CI_Controller
             $this->db->where('id',$upId);
             $this->db->update("customer_shipment_member_info", $info);
 
-            $payment_transaction=[
-                'credit_amount'             =>  $openingDue,
-                'remarks'                   =>  (!empty($remarks)?$remarks:''),
-                'updated_by'                =>  $this->userId,
-                'updated_time'              =>  $this->dateTime,
-                'updated_ip'                =>  $this->ipAddress,
-            ];
-            $this->db->where(['customer_member_id'=>$upId,'type'=>10,'is_opening_balance'=>2]);
-            $this->db->update("transaction_info",$payment_transaction);
+            $getOpeningBal=$this->REPORT->get_single_transaction_info(['transaction_info.customer_member_id'=>$upId,'transaction_info.type'=>10,'transaction_info.is_opening_balance'=>2]);
+
+            if(empty($getOpeningBal)){
+                $payment_transaction=[
+                    'customer_member_id'        =>  $upId,
+                    'credit_amount'             =>  (!empty($openingDue)?$openingDue:'0.00'),
+                    'payment_date'              =>  date('Y-m-d'),
+                    'type'                      =>  10,
+                    'remarks'                   =>  (!empty($remarks)?$remarks:''),
+                    'is_opening_balance'        =>  2,
+                    'created_by'                =>  $this->userId,
+                    'created_time'              =>  $this->dateTime,
+                    'created_ip'                =>  $this->ipAddress,
+                ];
+                $this->db->insert("transaction_info",$payment_transaction);
+            }else {
+                $payment_transaction = [
+                    'credit_amount' => (!empty($openingDue)?$openingDue:'0.00'),
+                    'remarks' => (!empty($remarks) ? $remarks : ''),
+                    'updated_by' => $this->userId,
+                    'updated_time' => $this->dateTime,
+                    'updated_ip' => $this->ipAddress,
+                ];
+                $this->db->where(['customer_member_id' => $upId, 'type' => 10, 'is_opening_balance' => 2]);
+                $this->db->update("transaction_info", $payment_transaction);
+            }
 
             $message='Successfully Update Information';
         }

@@ -1443,6 +1443,13 @@ function addCustomerDueCollection() {
     $("#customerDueCollectionForm")[0].reset();
     $("#show_label").html('Save');
     $("#alert_error").hide();
+    $(".amountClear").attr('readonly',true);
+    $(".receivedByChecked").attr('checked',false);
+    $(".paymentType").hide();
+
+    $("#accountID").val('').trigger('change');
+    $("#customerIdDD").val('').trigger('change');
+
 }
 $('#customerName_11').change(function(){
     var customer_id=$("#customerID_11").val();
@@ -2342,9 +2349,9 @@ function updateCustomerTransInfo(id){
                     $("#paidNow").val(data.debit_amount);
                 }
 
-
+                console.log(data);
                 $("#transactionType").val(transactionType);
-                $("#customerIdDD").html("<option value='"+data.customer_member_id+"'>"+data.customer_member_id+"</option>");
+                $("#customerIdDD").html("<option value='"+data.customer_member_id+"'>"+data.customerName+ " ["+data.customerMobile+"]</option>");
                 $("#payment_date").val(data.payment_date);
                 $("#remarks").val(data.remarks);
                 $("#upId").val(data.id);

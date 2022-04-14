@@ -136,6 +136,7 @@
                                     <th rowspan="4"  class="paymentBy text-right"> Received By </th>
                                     <td>
                                         <label class="radio-inline"> <input type="checkbox" id="cash"
+
                                                                             value="cash"
                                                                             onchange="isCheckedById(this)"
                                                                             checked
@@ -149,13 +150,13 @@
                                     <td>
                                         <input type="text" placeholder="0.00"   id="cash_amount"
                                                name="payment_ctg_amount[]"
-                                               class="form-control payment_ctg_amount">
+                                               class="form-control payment_ctg_amount ">
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
                                         <label class="radio-inline"> <input type="checkbox" id="cash_cheque"
-                                                                            onchange="isCheckedById(this)"
+                                                                            onchange="isCheckedById(this)" class="receivedByChecked"
                                                                             value="cash_cheque"
                                                                             name="payment_by[1]"
                                             ></label>
@@ -168,12 +169,12 @@
                                         <input type="text" placeholder="0.00"  readonly
                                                id="cash_cheque_amount"
                                                name="payment_ctg_amount[]"
-                                               class="form-control payment_ctg_amount">
+                                               class="form-control payment_ctg_amount amountClear">
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <label class="radio-inline"> <input type="checkbox" id="due_cheque"
+                                        <label class="radio-inline"> <input type="checkbox" id="due_cheque" class="receivedByChecked"
                                                                             onclick="isCheckedById(this)"
                                                                             value="due_cheque"
                                                                             name="payment_by[2]"
@@ -186,12 +187,12 @@
                                     <td>
                                         <input type="text" placeholder="0.00"   id="due_cheque_amount"
                                                name="payment_ctg_amount[]" readonly
-                                               class="form-control payment_ctg_amount">
+                                               class="form-control payment_ctg_amount amountClear">
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <label class="radio-inline"> <input type="checkbox" id="online"
+                                        <label class="radio-inline"> <input type="checkbox" id="online" class="receivedByChecked"
                                                                             onclick="isCheckedById(this)"
                                                                             value="online"
                                                                             name="payment_by[3]"
@@ -204,7 +205,7 @@
                                     <td>
                                         <input placeholder="0.00"  type="text"  id="online_amount" readonly
                                                name="payment_ctg_amount[]"
-                                               class="form-control payment_ctg_amount">
+                                               class="form-control payment_ctg_amount amountClear">
                                     </td>
                                 </tr>
                             </table>
