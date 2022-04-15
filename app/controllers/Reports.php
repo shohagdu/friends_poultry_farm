@@ -264,4 +264,34 @@ function dailySalesReports() {
         $data['info']=$this->REPORT->details_purchase_report($param);
         return   $this->load->view('dashboard/reports/purchase/detailsPurchasePurchseAction', $data);
     }
+    function expReports() {
+        $param['transaction_info.type']             = 8;
+        $param['transaction_info.payment_date']     = date('Y-m-d');
+        $data = array();
+        $view = array();
+        $data['title']          = "Expense Reports";
+        $data['info']           = $this->REPORT->get_transaction_info($param);
+        $view['content']        = $this->load->view('dashboard/reports/expense/expReports', $data, TRUE);
+        $this->load->view('dashboard/index', $view);
+    }
+    function searchingexpReports() {
+        extract($_POST);
+        $data = array();
+        $param=[];
+        $date=$this->input->post('searchingDate');
+        if($date!=''){
+            $exp_date=explode("-",$date);
+            $param['firstDate']      =    $exp_date[0];
+            $param['toDate']         =    $exp_date[1];
+        }else{
+            return "Date is required.";
+        }
+        $param['transaction_info.type']             = 8;
+
+        $data['info']=$this->REPORT->get_transaction_info($param);
+        echo "<pre>";
+        print_r($data['info']);
+        exit;
+        return  $this->load->view('dashboard/reports/expense/searchingexpReports', $data);
+    }
 }

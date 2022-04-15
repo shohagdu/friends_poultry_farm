@@ -47,12 +47,22 @@ class Reports_model extends CI_Model {
         }
     }
     public function get_transaction_info($where){
-        $this->db->select('transaction_info.*,sales_info.sales_date',true);
+        $this->db->select('transaction_info.*,sales_info.sales_date,customer_shipment_member_info.name as customerName,customer_shipment_member_info.mobile as customerMobile,customer_shipment_member_info.address,expense.title as expenseTitle,expenseBankInfo.bank_id as expenseBankID',true);
+
+        if(!empty($where['firstDate']) && !empty($where['toDate']) ){
+            $this->db->where("payment_date >=", $where['firstDate']);
+            $this->db->where("payment_date <=", $where['toDate']);
+            unset($where['firstDate']);
+            unset($where['toDate']);
+        }
         if(!empty($where)) {
             $this->db->where($where);
         }
         $this->db->where('transaction_info.is_active', 1);
         $this->db->join('sales_info', 'sales_info.id = transaction_info.sales_id', 'left');
+        $this->db->join('customer_shipment_member_info', 'customer_shipment_member_info.id = transaction_info.customer_member_id', 'left');
+        $this->db->join('all_settings_info as expense', 'expense.id = transaction_info.expense_ctg AND transaction_info.type=8 AND  expense.type=7 ', 'left');
+        $this->db->join('transaction_info as expenseBankInfo', 'expenseBankInfo.parent_id = transaction_info.id AND expenseBankInfo.type=5', 'left');
         $this->db->order_by("transaction_info.id","ASC");
         $row_info = $this->db->get('transaction_info');
         if($row_info->num_rows()>0){
@@ -62,13 +72,16 @@ class Reports_model extends CI_Model {
         }
     }
     public function get_single_transaction_info($where){
-        $this->db->select('transaction_info.*,sales_info.sales_date,customer_shipment_member_info.name as customerName,customer_shipment_member_info.mobile as customerMobile,customer_shipment_member_info.address',true);
+        $this->db->select('transaction_info.*,sales_info.sales_date,customer_shipment_member_info.name as customerName,customer_shipment_member_info.mobile as customerMobile,customer_shipment_member_info.address,expense.title as expenseTitle,expenseBankInfo.bank_id as expenseBankID',true);
         if(!empty($where)) {
             $this->db->where($where);
         }
         $this->db->where('transaction_info.is_active', 1);
         $this->db->join('sales_info', 'sales_info.id = transaction_info.sales_id', 'left');
         $this->db->join('customer_shipment_member_info', 'customer_shipment_member_info.id = transaction_info.customer_member_id', 'left');
+        $this->db->join('all_settings_info as expense', 'expense.id = transaction_info.expense_ctg AND transaction_info.type=8 AND  expense.type=7 ', 'left');
+        $this->db->join('transaction_info as expenseBankInfo', 'expenseBankInfo.parent_id = transaction_info.id AND expenseBankInfo.type=5', 'left');
+
         $this->db->order_by("transaction_info.id","ASC");
         $row_info = $this->db->get('transaction_info');
         if($row_info->num_rows()>0){

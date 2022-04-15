@@ -15,6 +15,7 @@ class Expenses extends CI_Controller {
         $this->load->model('Expenses_model', 'EXPENSES', TRUE);
         $this->load->model('Settings_model', 'SETTINGS', TRUE);
         $this->load->model('Common_model', 'COMMON_MODEL', TRUE);
+        $this->load->model('Reports_model', 'REPORT', TRUE);
 
         $this->userId               = $this->session->userdata('user');
         $this->dateTime             = date('Y-m-d H:i:s');
@@ -37,6 +38,17 @@ class Expenses extends CI_Controller {
         $view['content']            = $this->load->view('dashboard/expenses/create', $data, TRUE);
         $this->load->view('dashboard/index', $view);
     }
+    function edit($id) {
+        $data['expensehead']        =  $this->SETTINGS->settingInfo(7);
+        $data['account']            = $this->SETTINGS->account();
+        $data['expenseInfo']        = $this->REPORT->get_single_transaction_info(['sha1(transaction_info.id)'=>$id]);
+
+        $view                       = array();
+        $data['title']              = "Update Expense Information";
+        $view['content']            = $this->load->view('dashboard/expenses/edit', $data, TRUE);
+        $this->load->view('dashboard/index', $view);
+    }
+
 
     public function updateExpenseItem(){
         extract($_POST);
@@ -53,32 +65,60 @@ class Expenses extends CI_Controller {
         if(empty($date)){
             echo json_encode(['status'=>'error','message'=>'Date  is required','data'=>'']);exit;
         }
-        $info = array(
-            'transCode'             => time(),
-            'remarks'               => $note,
-            'payment_date'          => date('Y-m-d',strtotime($date)),
-            'created_by'            => $this->userId,
-            'created_time'          => $this->dateTime,
-            'created_ip'            => $this->ipAddress,
-        );
+        if(empty($updateID)) {
+            $info = array(
+                'transCode' => time(),
+                'remarks' => $note,
+                'payment_date' => date('Y-m-d', strtotime($date)),
+                'created_by' => $this->userId,
+                'created_time' => $this->dateTime,
+                'created_ip' => $this->ipAddress,
+            );
 
+            $debitInfo = $info;
+            $debitInfo['type'] = 8; // Expense Head
+            $debitInfo['debit_amount'] = $amount;
+            $debitInfo['expense_ctg'] = $head_id;
+            $this->db->insert("transaction_info", $debitInfo);
 
-        $debitInfo                      = $info;
-        $debitInfo['type']              = 8; // Expense Head
-        $debitInfo['debit_amount']      = $amount;
-        $debitInfo['expense_ctg']       = $head_id;
-        $this->db->insert("transaction_info", $debitInfo);
+            $parentID = $this->db->insert_id();
+            if (!empty($parentID)) {
+                $creditInfo = $info;
+                $creditInfo['type'] = 5; // Bank Credit
+                $creditInfo['credit_amount'] = $amount;
+                $creditInfo['bank_id'] = $account_id;
+                $creditInfo['parent_id'] = $parentID;
+                $this->db->insert("transaction_info", $creditInfo);
+            }
+            $message = 'Successfully Saved Your Record';
+        }else{
+            $info = array(
+                'transCode' => time(),
+                'remarks' => $note,
+                'payment_date' => date('Y-m-d', strtotime($date)),
+                'updated_by' => $this->userId,
+                'updated_time' => $this->dateTime,
+                'updated_ip' => $this->ipAddress,
+            );
 
-        $parentID=$this->db->insert_id();
-        if(!empty($parentID)) {
-            $creditInfo                     = $info;
-            $creditInfo['type']             = 5; // Bank Credit
-            $creditInfo['credit_amount']    = $amount;
-            $creditInfo['bank_id']          = $account_id;
-            $creditInfo['parent_id']        = $parentID;
-            $this->db->insert("transaction_info", $creditInfo);
+            $debitInfo = $info;
+            $debitInfo['type'] = 8; // Expense Head
+            $debitInfo['debit_amount'] = $amount;
+            $debitInfo['expense_ctg'] = $head_id;
+            $this->db->where('id',$updateID);
+            $this->db->update("transaction_info", $debitInfo);
+
+            if (!empty($parentID)) {
+                $creditInfo                     = $info;
+                $creditInfo['type']             = 5; // Bank Credit
+                $creditInfo['credit_amount']    = $amount;
+                $creditInfo['bank_id']          = $account_id;
+
+                $this->db->where('parent_id',$updateID);
+                $this->db->update("transaction_info", $creditInfo);
+            }
+            $message = 'Successfully Update Your Record';
         }
-        $message = 'Successfully Saved Your Record';
 
         $this->db->trans_complete();
         if ($this->db->trans_status() === true) {
@@ -130,12 +170,6 @@ class Expenses extends CI_Controller {
             exit;
         }
     }
-    function expenseCtg() {
-        $data['exp_head_list']        =  $this->SETTINGS->settingInfo(7);
-        $view                       = array();
-        $data['title']              = "Expense Category List";
-        $view['content']            = $this->load->view('dashboard/expenses/expHeadlist', $data, TRUE);
-        $this->load->view('dashboard/index', $view);
-    }
+
 
 }

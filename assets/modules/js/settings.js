@@ -2042,6 +2042,11 @@ $('#accountType').change(function(){
 });
 
 function saveExpenseInfo() {
+    $("#alert_error").hide();
+    $("#alert").hide();
+    $("#show_error_save_info").html('');
+    $("#show_message").html('');
+
      $("#updateBtn").attr("disabled", true);
     $.ajax({
         url:  base_url +"expenses/updateExpenseItem/",
@@ -2049,14 +2054,15 @@ function saveExpenseInfo() {
         type: "POST",
         dataType:'JSON',
         success: function (response) {
-            $("#updateBtn").attr("disabled", false);
+
             if(response.status=='error'){
+                $("#updateBtn").attr("disabled", false);
+                $("#alert_error").show();
                 $("#show_error_save_info").html(response.message);
             }else{
-                $('#purchaseProductModal').modal('toggle');
-
+                $("#alert").show();
+                $("#show_message").html(response.message);
                 setTimeout(function(){
-                    alert(response.message);
                     window.location = base_url + response.redirect_page;
                 },1500);
 
@@ -2359,6 +2365,20 @@ function updateCustomerTransInfo(id){
 
 
 
+            }
+        }
+    });
+}
+function searchingDailySalesReports () {
+    $(".search_btn").attr("disabled", true);
+    $.ajax({
+        url:  base_url +"reports/searchingexpReports/",
+        data: $('#expReportForm').serialize(),
+        type: "POST",
+        success: function (response) {
+            $(".search_btn").attr("disabled", false);
+            if(response!=''){
+                $("#infoDataShow").html(response);
             }
         }
     });

@@ -25,24 +25,21 @@
                         <tbody>
                             <?php
                             $sl = 1;
-                            echo "<pre>";
-                            print_r($exp_head_list);
-                            exit;
                             if(!empty($exp_head_list)){
-                            foreach ($exp_head_list as $exphdeach) { ?>
-                                <?php if ($exphdeach['softDelete'] == 0) { ?>
+                            foreach ($exp_head_list as $exphdeach) {
+                                ?>
                                     <tr>
                                         <td><?php echo $sl; ?></td>
-                                        <td><?php echo $exphdeach['title']; ?></td>
+                                        <td><?php echo $exphdeach->title; ?></td>
                                         <td>
-                                            <a style="margin-right: 5px;" href="<?php echo base_url('expenses/expHeadedit'); ?>/<?php echo $exphdeach['expheadID']; ?>" class="btn btn-primary btn-sm pull-left">Edit</a>
-                                            <a href="<?php echo base_url('expenses/expheaddelete'); ?>/<?php echo $exphdeach['expheadID']; ?>" onclick="return confirm('Are You Want to Delete this expense head.');" class="btn btn-danger btn-sm pull-left">Delete</a>
+                                            <a style="margin-right: 5px;" href="<?php echo base_url('expenses/expHeadedit'); ?>/<?php echo $exphdeach->id; ?>" class="btn btn-primary btn-sm pull-left">Edit</a>
+                                            <a href="<?php echo base_url('expenses/expheaddelete'); ?>/<?php echo
+                                            $exphdeach->id; ?>" onclick="return confirm('Are You Want to Delete this expense head.');" class="btn btn-danger btn-sm pull-left">Delete</a>
                                         </td>
                                     </tr>
                                 <?php } ?>
-
                                 <?php $sl++; ?>
-                            <?php } } ?>
+                            <?php  } ?>
                         </tbody>
                         <tfoot>
                         </tfoot>

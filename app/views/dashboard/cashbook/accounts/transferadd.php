@@ -89,7 +89,6 @@
                                         <span id="show_message"></span>
                                     </div>
                                 </div>
-
                             </div>
                             <div class="form-group has-feedback">
                                 <div class="col-xs-4">

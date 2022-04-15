@@ -831,7 +831,9 @@ class Settings extends CI_Controller
         $payment_byInfo=[];
         if(!empty($payment_by)){
             foreach ($payment_by as $key=>$payCtg){
-                $payment_byInfo[$payCtg]=number_format($payment_ctg_amount[$key],2,'.','');
+                if(!empty($payment_ctg_amount[$key])) {
+                    $payment_byInfo[$payCtg] = number_format($payment_ctg_amount[$key], 2, '.', '');
+                }
             }
         }
         if(empty($customer_id)){
@@ -953,5 +955,13 @@ class Settings extends CI_Controller
         $this->load->view('dashboard/index', $view);
     }
 
-
+    function expenseCtg() {
+        $data = array();
+        $view = array();
+        $data['title'] = "Expense Category";
+        $data['type'] = 7;
+        $data['redierct_page'] = 'expenseCtg';
+        $view['content'] = $this->load->view('dashboard/settings/setting_info', $data, TRUE);
+        $this->load->view('dashboard/index', $view);
+    }
 }

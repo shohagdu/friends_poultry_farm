@@ -67,6 +67,17 @@
                                 </div>
                             </div>
                             <div class="form-group has-feedback">
+                                <div class="box-body" id="alert_error" style="display: none;">      <div  class="callout callout-danger">
+                                        <span id="show_error_save_info"></span>
+                                    </div>
+                                </div>
+                                <div class="box-body" id="alert" style="display: none;">      <div  class="callout
+                                callout-info">
+                                        <span id="show_message"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group has-feedback">
                                 <div class="col-xs-4">
                                     <button type="button" id="updateBtn" onclick="saveExpenseInfo()" class="btn
                                     btn-success
@@ -76,6 +87,7 @@
                                     </button>
                                 </div>
                             </div>
+
                         </form>
                     </div>
                 </div>

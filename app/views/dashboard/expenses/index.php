@@ -16,12 +16,14 @@
                         <div class="form-group">
                             <div class="col-sm-3 col-xs-8 clearfix">
                                 <select id="expenseCtg" class=" form-control" >
-                                    <option value="">Select Expense Head</option>
-                                </select>
-                            </div>
-                            <div class="col-sm-3 col-xs-4 clearfix">
-                                <select id="bankID" class=" form-control" >
-                                    <option value="">Select Expense Head</option>
+                                    <option value="">Select Expense Category</option>
+                                    <?php
+                                        if(!empty($expensehead)){
+                                            foreach ($expensehead as $expHead){
+                                                echo '<option value="'.$expHead->id.'">'.$expHead->title.'</option>';
+                                            }
+                                        }
+                                    ?>
                                 </select>
                             </div>
                         </div>
@@ -33,10 +35,10 @@
                                 <th style="width: 5%;">S/N</th>
                                 <th style="width: 15%;">Date</th>
                                 <th style="width: 20%;">Expense Category</th>
-                                <th style="width: 20%;">Account Info</th>
+                                <th style="width: 15%;">Account Info</th>
                                 <th style="width: 10%;">Exp. Account</th>
                                 <th style="width: 10%;">Remarks</th>
-                                <th style="width: 15%;">Action</th>
+                                <th style="width: 20%;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
