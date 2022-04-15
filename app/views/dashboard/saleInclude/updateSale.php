@@ -12,11 +12,16 @@ include ('salesHeader.php')
                                 <div class="col-sm-7 search col-xs-12"  style="margin-bottom:10px;">
                                     <div class="row">
                                         <span class="glyphicon glyphicon-search"></span>
-                                        <input required="" name="cst_name"
-                                               placeholder="Name/Mobile/Email/ Address"
-                                               class="customer form-control" onfocus="true"
-                                               id="tags_11">
-                                        <input type="hidden" value="<?php echo (!empty($sales->customer_id)?$sales->customer_id:'') ?>" name="customer" id="cst_id"/>
+                                        <select id="cst_id" style="width: 100%" class="customerNameDD"
+                                                name="customer"
+                                                required="required">
+                                            <option value="<?php echo (!empty($sales->customer_id)
+                                                ?$sales->customer_id:'') ?>"><?php echo (!empty
+                                                ($sales->customer_name)?$sales->customer_name:'').(!empty
+                                                    ($sales->customer_mobile)?" (".$sales->customer_mobile.")":'').
+                                                    (!empty($sales->address)?" -".$sales->address:'')
+                                                ?></option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-sm-1 col-xs-4" >

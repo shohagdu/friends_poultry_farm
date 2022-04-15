@@ -1,11 +1,9 @@
 <section class="content">
     <div class="row">
         <div class="col-md-12">
-           
             <div class="box">
                 <div class="box-header">
                     <h3 class="box-title">Expense Head</h3>
-
                     <?php
                         if($this->session->flashdata('msg')){
                             echo $this->session->flashdata('msg');
@@ -25,8 +23,13 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $sl = 1; ?>
-                            <?php foreach ($exp_head_list as $exphdeach) { ?>
+                            <?php
+                            $sl = 1;
+                            echo "<pre>";
+                            print_r($exp_head_list);
+                            exit;
+                            if(!empty($exp_head_list)){
+                            foreach ($exp_head_list as $exphdeach) { ?>
                                 <?php if ($exphdeach['softDelete'] == 0) { ?>
                                     <tr>
                                         <td><?php echo $sl; ?></td>
@@ -39,7 +42,7 @@
                                 <?php } ?>
 
                                 <?php $sl++; ?>
-                            <?php } ?>
+                            <?php } } ?>
                         </tbody>
                         <tfoot>
                         </tfoot>

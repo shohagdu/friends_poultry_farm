@@ -18,7 +18,7 @@
 <script src="<?php echo base_url(); ?>assets/dist/js/demo.js"></script>
 <script src="<?php echo base_url(); ?>assets/modules/js/sales.js"></script>
 <!--    <script src="--><?php //echo base_url(); ?><!--assets/modules/js/settings.js"></script>-->
-
+<script src="<?php echo base_url(); ?>assets/plugins/select2/select2.full.min.js" ></script>
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/plugins/datepicker/datepicker3.css">
 <script src="<?php echo base_url(); ?>assets/plugins/datepicker/bootstrap-datepicker.js"></script>
 </div>

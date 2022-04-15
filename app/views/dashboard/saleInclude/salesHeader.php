@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/bootstrap/fonts/css/ionicons.min.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/bootstrap/fonts/css/jquery-ui.css">
 
-
+    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/plugins/select2/select2.min.css" >
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/AdminLTE.min.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/skins/_all-skins.min.css">
 

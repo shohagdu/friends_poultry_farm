@@ -130,5 +130,12 @@ class Expenses extends CI_Controller {
             exit;
         }
     }
+    function expenseCtg() {
+        $data['exp_head_list']        =  $this->SETTINGS->settingInfo(7);
+        $view                       = array();
+        $data['title']              = "Expense Category List";
+        $view['content']            = $this->load->view('dashboard/expenses/expHeadlist', $data, TRUE);
+        $this->load->view('dashboard/index', $view);
+    }
 
 }

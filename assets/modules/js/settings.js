@@ -2207,7 +2207,7 @@ $("#purchaseProductSearch").autocomplete({
 
 var scntDivPurchase = $('#tableDynamicPurchase');
 var iStockIN = $('#tableDynamicPurchase tr').size() + 1;
-console.log(iStockIN);
+
 function addRowProductPurchase(id,purchasePrice,productInfo,productCode,salePrice){
     var pQty;
     // todo: IF PRODUCT IS EXIST THEN AUTOMATIC ADD IN QUEUE START

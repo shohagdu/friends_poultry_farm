@@ -12,11 +12,14 @@
                                         <div class="col-sm-7 search col-xs-12"  style="margin-bottom:10px;">
                                             <div class="row">
                                                 <span class="glyphicon glyphicon-search"></span>
-                                                <input required="" name="cst_name"
-                                                    placeholder="Name/Mobile/Email/ Address"
-                                                    class="customer form-control"
-                                                    id="tags_11">
-                                                <input type="hidden" name="customer" id="cst_id"/>
+<!--                                                <input required="" name="cst_name"-->
+<!--                                                    placeholder="Name/Mobile/Email/ Address"-->
+<!--                                                    class="customer form-control"-->
+<!--                                                    id="tags_11">-->
+<!--                                                <input type="hidden" name="customer" id="cst_id"/>-->
+                                                <select id="cst_id" style="width: 100%" class="customerNameDD"
+                                                        name="customer"
+                                                        required="required"></select>
                                             </div>
                                         </div>
                                         <div class="col-sm-1 col-xs-4" >

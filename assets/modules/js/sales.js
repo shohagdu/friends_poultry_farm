@@ -267,7 +267,7 @@ var addRowProduct = function (id, inventory, price, value,  productCode,unit_sal
 
         $("#confirmModal").on("click", function (e) {
             $("#show_error_save_main").html('');
-            var customerId = $("#cst_id").val();
+            var customerId=$('#cst_id').text();
             var allAreRunningCustomer = $('input[name="allAreRunningCustomer"]:checked').val();
             // console.log(allAreRunningCustomer);
             if (customerId == ''  &&  typeof allAreRunningCustomer=='undefined') {
@@ -276,8 +276,7 @@ var addRowProduct = function (id, inventory, price, value,  productCode,unit_sal
             } else {
                 $("#emptyMember").hide('blind', {}, 500)
                 $("#salesConfirmModal").modal("show");
-    
-                var name = $("#showName").html();
+
                 var subAmount = $("#totalAmount").val();
                 var paidNow = $("#paidNow").val();
                 var currentDueAmount = $("#currentDueAmount").val();
@@ -305,7 +304,7 @@ var addRowProduct = function (id, inventory, price, value,  productCode,unit_sal
                     var totalCustomerDueT=totalCustomerDue;
                 }
 
-                $("#showConfirmName").html(name);
+                $("#showConfirmName").html(customerId);
                 $("#showNetTotal").html(subAmount);
                 $("#showPaymentAmount").html(paidNowAmount);
                 $("#showCurrentDueAmount").html(currentDueAmountT);
@@ -421,4 +420,32 @@ $('.payment_ctg_amount').keyup(function () {
     });
     $("#paidNow").val(row_total_info);
     findTotal();
+});
+$(document).ready(function () {
+    $(".customerNameDD").select2({
+        placeholder: "Search Customer Information",
+        minimumInputLength: 3,
+        width: "100%",
+        ajax: {
+            url: base_url + "shipment_info/customerNameSuggestion",
+            dataType: "json",
+            type: "GET",
+            data: function (request) {
+                return {
+                    term: request.term,
+                };
+            },
+            processResults: function (data) {
+                console.log(data);
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            text: item.value,
+                            id: item.id,
+                        };
+                    }),
+                };
+            },
+        },
+    });
 });
