@@ -315,7 +315,7 @@ class Shipment_model extends CI_Model {
         return $response;
     }
 
-    public function show_member_due_amount($param){
+    public function  show_member_due_amount($param){
         $this->db->select("sum(transaction_info.credit_amount) as tCreditAmt,sum(transaction_info.debit_amount) as tDebitAmt");
         if($param != ''){
             $this->db->where($param);

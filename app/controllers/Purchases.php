@@ -407,10 +407,10 @@ class Purchases extends CI_Controller {
     }
 
     function supplierPayment() {
-        $data['accounts']        = $this->SETTINGS->account();
         $view = array();
-        $data['title']          = "Supplier Due Collection";
-        $view['content']        = $this->load->view('dashboard/shipment/member_due_collection', $data, TRUE);
+        $data['accounts']        = $this->SETTINGS->account();
+        $data['title']           = "Supplier Due Collection";
+        $view['content']         = $this->load->view('dashboard/shipment/member_due_collection', $data, TRUE);
         $this->load->view('dashboard/index', $view);
     }
 }

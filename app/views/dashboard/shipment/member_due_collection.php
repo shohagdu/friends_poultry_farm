@@ -31,14 +31,14 @@
                     <table id='shipmnetMemberDueCollectionInfo' class='display dataTable table table-bordered
                     table-hover' >
                         <thead>
-                        <tr>
-                            <th>S/L</th>
-                            <th>Member Name </th>
-                            <th>Date</th>
-                            <th>Collection Amt</th>
-                            <th>Note</th>
-                            <th></th>
-                        </tr>
+                            <tr>
+                                <th>S/L</th>
+                                <th>Member Name </th>
+                                <th>Date</th>
+                                <th>Collection Amt</th>
+                                <th>Note</th>
+                                <th></th>
+                            </tr>
                         </thead>
                         <tbody>
 
@@ -67,15 +67,16 @@
                 <div class="modal-body">
                     <div class="form-group col-sm-12">
                         <label class="col-sm-3 text-right">
-                            Member Name
+                            Supplier Name
                         </label>
                         <div class="col-sm-9">
-                            <input type="text" id="member_name_11" class="memberName form-control"
-                                   placeholder="Enter Member Name / Mobile / Address"  >
+                            <select id="member_name_11" name="member_id" class="memberNameDD form-control" ></select>
+                            <!--
                             <input type="hidden" name="member_id" id="memberid_11" class="  form-control"  >
+                            .-->
                         </div>
                     </div>
-                    <div class="form-group col-sm-12">
+                    <div class="form-group col-sm-12 dueAmount">
                         <label class="col-sm-3 text-right">
                             Due Amount
                         </label>
@@ -91,7 +92,7 @@
                             Account Name
                         </label>
                         <div class="col-sm-9">
-                            <select name="accountID" class="form-control select2" style="width: 100%;">
+                            <select name="accountID" id="accountID" class="form-control select2" style="width: 100%;">
                                 <option value="">Select Account</option>
                                 <?php if(!empty($accounts)){ foreach ($accounts as $account) { ?>
                                     <option value="<?php echo $account->accountID; ?>"><?php echo $account->accountName; ?></option>
@@ -125,10 +126,8 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <label class="radio-inline"> <input type="checkbox" id="cash_cheque"
-                                                                            onchange="isCheckedById(this)"
-                                                                            value="cash_cheque"
-                                                                            name="payment_by[1]"
+                                        <label class="radio-inline"> <input type="checkbox" id="cash_cheque" class="transType"
+                                                                            onchange="isCheckedById(this)"           value="cash_cheque"   name="payment_by[1]"
                                             ></label>
                                     </td>
                                     <td>
@@ -144,7 +143,7 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <label class="radio-inline"> <input type="checkbox" id="due_cheque"
+                                        <label class="radio-inline"> <input type="checkbox" id="due_cheque" class="transType"
                                                                             onclick="isCheckedById(this)"
                                                                             value="due_cheque"
                                                                             name="payment_by[2]"
@@ -162,7 +161,7 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <label class="radio-inline"> <input type="checkbox" id="online"
+                                        <label class="radio-inline"> <input type="checkbox" id="online" class="transType"
                                                                             onclick="isCheckedById(this)"
                                                                             value="online"
                                                                             name="payment_by[3]"
@@ -192,7 +191,7 @@
                                    id="paidNow">
                         </div>
                     </div>
-                    <div class="form-group col-sm-12">
+                    <div class="form-group col-sm-12 currentDueAmount">
                         <label class="col-sm-3 text-right">
                             Current Due
                         </label>

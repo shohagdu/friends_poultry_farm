@@ -287,11 +287,7 @@ function dailySalesReports() {
             return "Date is required.";
         }
         $param['transaction_info.type']             = 8;
-
         $data['info']=$this->REPORT->get_transaction_info($param);
-        echo "<pre>";
-        print_r($data['info']);
-        exit;
         return  $this->load->view('dashboard/reports/expense/searchingexpReports', $data);
     }
 }

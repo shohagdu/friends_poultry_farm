@@ -16,8 +16,6 @@
                             <div class="clearfix"></div>
                             <input type="text" id="reservation" name="searchingDate" placeholder="Date" class="form-control">
                         </div>
-
-
                         <div class="col-sm-2" style="margin-top:25px;">
                             <button type="button" onclick="searchingDailySalesReports()" class="btn btn-info search_btn" ><i
                                     class="glyphicon
@@ -33,18 +31,17 @@
                         <div id="stock_info_data">
                             <table  class="table-style table" style="width:100%;border:1px solid #d0d0d0;">
                                 <thead>
+                                    <tr>
+                                        <td class="font-weight-bold"> SL</td>
+                                        <td class="font-weight-bold"> Sales ID</td>
+                                        <td class="font-weight-bold"> Date</td>
+                                        <td class="font-weight-bold"> Customer Info</td>
+                                        <td class="font-weight-bold"> Sub Total</td>
+                                        <td class="font-weight-bold"> Discount</td>
+                                        <td class="font-weight-bold"> Net Total</td>
+                                        <td class="font-weight-bold"> Payment </td>
 
-                                <tr>
-                                    <td class="font-weight-bold"> SL</td>
-                                    <td class="font-weight-bold"> Sales ID</td>
-                                    <td class="font-weight-bold"> Date</td>
-                                    <td class="font-weight-bold"> Customer Info</td>
-                                    <td class="font-weight-bold"> Sub Total</td>
-                                    <td class="font-weight-bold"> Discount</td>
-                                    <td class="font-weight-bold"> Net Total</td>
-                                    <td class="font-weight-bold"> Payment </td>
-
-                                </tr>
+                                    </tr>
                                 </thead>
                                 <tbody>
                                 <?php

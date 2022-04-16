@@ -16,6 +16,7 @@ class Shipment_info extends CI_Controller {
         $this->load->model('Products_model', 'PRODUCT', TRUE);
         $this->load->model('Common_model', 'COMMON_MODEL', TRUE);
         $this->load->model('Settings_model', 'SETTINGS', TRUE);
+        $this->load->model('Reports_model', 'REPORT', TRUE);
 
         $this->userId = $this->session->userdata('user');
         $this->dateTime = date('Y-m-d H:i:s');
@@ -559,7 +560,7 @@ class Shipment_info extends CI_Controller {
             echo json_encode(['status'=>'error','message'=>'Account Name is required','data'=>'']);exit;
         }
 
-        if(empty($payment_now)){
+        if(empty($payment_now) || $payment_now<=0 ){
             echo json_encode(['status'=>'error','message'=>'Payment Amount is required','data'=>'']);exit;
         }
         if(empty($payment_date)){
@@ -686,24 +687,12 @@ class Shipment_info extends CI_Controller {
     function get_single_shipment_delivery_info() {
        extract($_POST);
        if(!empty($id)) {
-           $ship_delivery_info = $this->SHIPMENT->shipment_delivery_info(['shipment_stock_details.id'=>$id]);
-           if(!empty($ship_delivery_info)){
-               $ship_delivery_info->present_stock_info='';
-               $ship_delivery_info->present_due_amt='';
-
-               // present Stock qty
-               $stockQty=$this->SHIPMENT->show_member_stock_qty(['member_id'=>$ship_delivery_info->member_id]);
-               $ship_delivery_info->present_stock_info=$stockQty+ (($ship_delivery_info->credit_qty)?$ship_delivery_info->credit_qty:0);
-
-               //present due calculation
-               $current_due_amt=$this->SHIPMENT->show_member_due_amount(['member_id'=>$ship_delivery_info->member_id]);
-               $ship_delivery_info->present_due_amt= $current_due_amt - (($ship_delivery_info->credit_amount)?$ship_delivery_info->credit_amount:0);
-
-               echo json_encode(['status'=>'success','message'=>'Data Found Successfully','data'=>$ship_delivery_info]); exit;
-           }else{
-               echo json_encode(['status'=>'error','message'=>'No Data Found ','data'=>'']); exit;
-           }
+           $supplierPaymentInfo        = $this->REPORT->get_single_transaction_info(['transaction_info.id'=>$id]);
+           echo json_encode(['status'=>'success','message'=>'Data Found Successfully','data'=>$supplierPaymentInfo]); exit;
+       }else{
+           echo json_encode(['status'=>'error','message'=>'No Data Found ','data'=>'']); exit;
        }
+
 
     }
 

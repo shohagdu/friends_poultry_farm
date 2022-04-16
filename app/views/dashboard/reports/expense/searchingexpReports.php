@@ -26,7 +26,7 @@
                 <td class="text-left">
                     <?php echo (!empty($row->expenseTitle)?$row->expenseTitle:''); ?>
                 </td>
-                <td><i class="badge"><?php echo (!empty($row->expenseBankName)?$row->expenseBankName:'');  ?></i></td>
+                <td><?php echo (!empty($row->expenseBankName)?$row->expenseBankName:'');  ?></td>
 
                 <td><?php echo (!empty($row->remarks)?$row->remarks:''); ?></td>
                 <td><i class="badge"><?php echo (!empty($row->debit_amount)

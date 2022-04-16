@@ -1083,6 +1083,7 @@ $(".memberName").autocomplete({
         return false;
     }
 });
+
 $(".customerName").autocomplete({
     source: base_url+ "shipment_info/customerNameSuggestion",
     select: function (event, ui) {
@@ -1109,6 +1110,31 @@ $(document).ready(function () {
                 };
             },
             processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            text: item.value,
+                            id: item.id,
+                        };
+                    }),
+                };
+            },
+        },
+    });
+    $(".memberNameDD").select2({
+        placeholder: "Search Supplier Information",
+        minimumInputLength: 3,
+        width: "100%",
+        ajax: {
+            url: base_url + "shipment_info/memberNameSuggestion",
+            dataType: "json",
+            type: "GET",
+            data: function (request) {
+                return {
+                    term: request.term,
+                };
+            },
+            processResults: function (data) {
                 console.log(data);
                 return {
                     results: $.map(data, function (item) {
@@ -1121,6 +1147,8 @@ $(document).ready(function () {
             },
         },
     });
+
+
 });
 
 //shipment member application
@@ -1301,6 +1329,13 @@ function addMemberDueCollection() {
     $("#MemberDueCollectionForm")[0].reset();
     $("#show_label").html('Save');
     $("#alert_error").hide();
+    $(".dueAmount").show();
+    $(".currentDueAmount").show();
+
+    $(".transType" ).attr('checked', false);
+    $(".payment_ctg_amount").attr('readonly', true);
+    $("#cash_amount").attr('readonly', false);
+
 }
 
 
@@ -1334,6 +1369,8 @@ function updatShipmentMemberDueCollection (id) {
     $("#MemberDueCollectionForm")[0].reset();
     $("#show_label").html('Update');
     $("#alert_error").hide();
+    $(".dueAmount").hide();
+    $(".currentDueAmount").hide();
     $.ajax({
         url: base_url +"shipment_info/get_single_shipment_delivery_info",
         data: {id: id},
@@ -1342,13 +1379,6 @@ function updatShipmentMemberDueCollection (id) {
         success: function (response) {
             if(response.status=='success'){
                 var data=response.data;
-                /*
-                    $("#cash").attr('checked',false);
-                    $("#cash_cheque").attr('checked',false);
-                    $("#due_cheque").attr('checked',false);
-                    $("#online").attr('checked',false);
-                */
-
                 var paymentBy= JSON.parse(data.payment_by);
                 $.each(paymentBy, function (key, value) {
                         $("#" + key).attr('checked', true);
@@ -1356,17 +1386,10 @@ function updatShipmentMemberDueCollection (id) {
                         $("#" + key + "_amount").val(value);
 
                 });
-
-
-
-                var current_due_ant=(parseFloat(data.present_due_amt)-parseFloat(data.credit_amount));
-                var currentStock=parseInt(data.present_stock_info)-parseInt(data.credit_qty);
-                $("#member_name_11").val(data.member_name+' ['+data.mobile+' ]');
-                $("#memberid_11").val(data.member_id);
-                $("#due_amount").val((data.present_due_amt).toFixed(2));
+                $("#accountID").html("<option value='"+data.bank_id+"'>"+data.bankName+"</option>");
+                $("#member_name_11").html("<option value='"+data.customer_member_id+"'>"+data.customerName+"</option>");
                 $("#paidNow").val(data.credit_amount);
-                $("#current_due_amount").val(current_due_ant.toFixed(2));
-                $("#delivery_date").val(data.trans_date);
+                $("#payment_date").val(data.payment_date_title);
                 $("#remarks").val(data.remarks);
                 $("#upId").val(data.id);
             }
@@ -1409,7 +1432,7 @@ function memberDueCal() {
 }
 
 $('#member_name_11').change(function(){
-    var member_id=$("#memberid_11").val();
+    var member_id=$(this).val();
     $("#paidNow").val('0.00');
     $(".payment_ctg_amount").val('');
     $("#current_due_amount").val('0.00');
@@ -2336,7 +2359,6 @@ function updateCustomerTransInfo(id){
                     $("#paidNow").val(data.debit_amount);
                     $("#accountID").select2("val", data.bank_id);
                     var paymentBy= JSON.parse(data.payment_by);
-                    console.log(paymentBy);
                     $.each(paymentBy, function (key, value) {
                         $("#" + key).attr('checked', true);
                         $("#" + key + "_amount").attr('readonly', false);
@@ -2354,11 +2376,9 @@ function updateCustomerTransInfo(id){
                     $(".transAmount").html('Discount Amount');
                     $("#paidNow").val(data.debit_amount);
                 }
-
-                console.log(data);
                 $("#transactionType").val(transactionType);
                 $("#customerIdDD").html("<option value='"+data.customer_member_id+"'>"+data.customerName+ " ["+data.customerMobile+"]</option>");
-                $("#payment_date").val(data.payment_date);
+                $("#payment_date").val(data.payment_date_title);
                 $("#remarks").val(data.remarks);
                 $("#upId").val(data.id);
 
