@@ -390,8 +390,11 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
                 $data[$key]->serial_no = (int) $i++;
                 $data[$key]->is_active =  ($record->is_active==1)?"<span class='badge bg-green'>Active</span>":"<span class='badge bg-red'>Inactive</span>";
                 if($record->type==1) {
-                    $data[$key]->current_due = (!empty($record->total_credit - $record->total_debit)) ? "<span class='badge' style='background-color:red;'>"
-                        . number_format(($record->total_credit - $record->total_debit),2) . "</span>" : "<span class='badge'>0.00</span>";
+                    $currentDueAmnt=($record->total_credit - $record->total_debit);
+                    $data[$key]->current_due = (!empty($currentDueAmnt) &&
+                        $currentDueAmnt>0) ? "<span class='badge' style='background-color:red;'>"
+                        . number_format($currentDueAmnt,2) . "</span>" : "<span class='badge' style='background-color:green;'>".number_format
+                        ($currentDueAmnt,2)."</span>";
 
                     $data[$key]->action = '<button  class="btn btn-primary  btn-sm" data-toggle="modal" onclick="updateCustomerMemberInfo(' . $record->id . ' )" data-target="#myModal"><i  class="glyphicon glyphicon-pencil"></i> Edit</button> <a  class="btn btn-info  btn-sm"  href="' . base_url('reports/details_customer_member_info/' . $record->id) . ' " ><i  class="glyphicon glyphicon-share-alt"></i> Ledger</a> ';
                 }else{
