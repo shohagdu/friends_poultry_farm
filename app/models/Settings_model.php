@@ -135,9 +135,8 @@ class Settings_model extends CI_Model {
         }
     }
 
+    /*
     public function SendSms($mobile,$sms) {
-
-
         $url = 'http://worldit.powersms.net.bd/httpapi/sendsms';
         $fields = array(
             'userId' => urlencode('duclub'),
@@ -219,7 +218,7 @@ class Settings_model extends CI_Model {
             }
         }
     }
-
+*/
 
     
      public function get_sms_info(){
@@ -446,12 +445,12 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
     }
     function get_single_customer_member_info($where=NULL)
     {
-        $this->db->select('customer_shipment_member_info.*,transaction_info.type,transaction_info.credit_amount');
+        $this->db->select('customer_shipment_member_info.*,transaction_info.type,transaction_info.credit_amount,transaction_info.debit_amount');
         $this->db->from('customer_shipment_member_info');
         if(!empty($where)) {
             $this->db->where($where);
         }
-        $this->db->join('transaction_info','transaction_info.customer_member_id = customer_shipment_member_info.id AND transaction_info.is_opening_balance=2 AND transaction_info.type=10','left');
+        $this->db->join('transaction_info','transaction_info.customer_member_id = customer_shipment_member_info.id AND transaction_info.is_opening_balance=2','left');
         $query_result = $this->db->get();
         if($query_result->num_rows()>0) {
             return $query_result->row();
@@ -683,7 +682,7 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
           6 => 'Supplier Bill Generate', // Cr
           7 => 'Supplier Payment', // Dr
           8 => 'Expense', // Dr // Bank Cr
-          9 => '',
+          9 => 'Customer Opening Deposit', // Cr
           10=> 'Opening Due', // Dr
           11=> 'Cash Deposit to Customer', // Dr
           12=> 'Closing Discount', // Cr

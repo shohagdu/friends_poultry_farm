@@ -19,6 +19,7 @@ class Pos extends CI_Controller
         $this->load->model('Common_model', 'COMMON_MODEL', TRUE);
         $this->load->model('Products_model', 'PRODUCTS', TRUE);
         $this->load->model('Cashbook_model', 'CASHBOOK', TRUE);
+        $this->load->model('Sms_model', 'SMS', TRUE);
 
         $user_outlet= $this->session->userdata('outlet_data');
         $this->outletID=$user_outlet['outlet_id'];
@@ -43,9 +44,8 @@ class Pos extends CI_Controller
     }
 
     public function save_sales_info(){
-//        echo "<pre>";
-//        print_r($_POST);
-//        exit;
+
+
         extract($_POST);
         $payment_byInfo=[];
         if(!empty($payment_by)){
@@ -73,88 +73,115 @@ class Pos extends CI_Controller
 //        if((isset($allAreRunningCustomer) && $allAreRunningCustomer==1) && empty($isRemainingDueMakesWithDiscount)  && ($totalAmount!= $paidNow) ){
 //            echo json_encode(['status'=>'error','message'=>'Invoice and Paid amount must be equal. Because Running Customer.','data'=>'']);exit;
 //        }
-        if(empty($upId)){
-            $sales_info=[
-                'sales_date'                        => !empty($saleDate)?date('Y-m-d',strtotime($saleDate)):'',
-                'customer_id'                       => $customer,
-                'outletID'                          => $this->outletID,
-                'invoice_no'                        => $this->generateRandomString(6),
-                'type'                              => 1,
-                'sub_total'                         => $subTotal,
-                'discount_type'                     => $discountType,
-                'discount_percent'                  => $discountPercent,
-                'discount'                          => $discount,
-                'remaining_due_make_discount'       => ((!empty($isRemainingDueMakesWithDiscount) && $isRemainingDueMakesWithDiscount==1)?$currentDueAmount:'0.00'),
-                'net_total'                         => $totalAmount,
-                'payment_by'                        => (!empty($payment_byInfo)?json_encode($payment_byInfo):''),
-                'payment_amount'                    => $paidNow,
-                'current_due_amt'                   => ((empty($isRemainingDueMakesWithDiscount))?$currentDueAmount:'0.00'),
-                'previous_due'                      => $customerPreviousDue,
-                'total_due'                         => $totalCustomerDue,
-                'created_by'                        => $this->userId,
-                'created_time'                      => $this->dateTime,
-                'created_ip'                        => $this->ipAddress,
+        $customerInfo = $this->SETTINGS->get_single_customer_member_info(['customer_shipment_member_info.id'=>$customer]);
+
+        if(empty($upId)) {
+            $invNo = $this->generateRandomString(6);
+            $saleDate = !empty($saleDate) ? date('Y-m-d', strtotime($saleDate)) : '';
+            $sales_info = [
+                'sales_date' => $saleDate,
+                'customer_id' => $customer,
+                'outletID' => $this->outletID,
+                'invoice_no' => $invNo,
+                'type' => 1,
+                'sub_total' => $subTotal,
+                'discount_type' => $discountType,
+                'discount_percent' => $discountPercent,
+                'discount' => $discount,
+                'remaining_due_make_discount' => ((!empty($isRemainingDueMakesWithDiscount) && $isRemainingDueMakesWithDiscount == 1) ? $currentDueAmount : '0.00'),
+                'net_total' => $totalAmount,
+                'payment_by' => (!empty($payment_byInfo) ? json_encode($payment_byInfo) : ''),
+                'payment_amount' => $paidNow,
+                'current_due_amt' => ((empty($isRemainingDueMakesWithDiscount)) ? $currentDueAmount : '0.00'),
+                'previous_due' => $customerPreviousDue,
+                'total_due' => $totalCustomerDue,
+                'created_by' => $this->userId,
+                'created_time' => $this->dateTime,
+                'created_ip' => $this->ipAddress,
             ];
             //print_r($sales_info);
-            $this->db->insert("sales_info",$sales_info);
-            $insert_id=$this->db->insert_id();
-           // $insert_id=1;
-            if(!empty($productID)){
-                foreach($productID as $key=>$product){
-                    $purchaseAmtForSales = $this->PRODUCTS->get_single_product_info(['product_info.id'=>$product]);
+            $this->db->insert("sales_info", $sales_info);
+            $insert_id = $this->db->insert_id();
+            // $insert_id=1;
+            if (!empty($productID)) {
+                foreach ($productID as $key => $product) {
+                    $purchaseAmtForSales = $this->PRODUCTS->get_single_product_info(['product_info.id' => $product]);
 
-                    $stock_info[]=[
-                        'stock_type'            =>  2,
-                        'product_id'            =>  $product,
-                        'sales_id'              =>  $insert_id,
-                        'total_item'            =>  $qty[$key],
-                        'unit_price'            =>  $price[$key],
-                        'total_price'           =>  $sub_total[$key],
+                    $stock_info[] = [
+                        'stock_type' => 2,
+                        'product_id' => $product,
+                        'sales_id' => $insert_id,
+                        'total_item' => $qty[$key],
+                        'unit_price' => $price[$key],
+                        'total_price' => $sub_total[$key],
 
-                        'purchaseAmtForSales'   =>  (!empty($purchaseAmtForSales->purchase_price)?$purchaseAmtForSales->purchase_price:'0.00'),
+                        'purchaseAmtForSales' => (!empty($purchaseAmtForSales->purchase_price) ? $purchaseAmtForSales->purchase_price : '0.00'),
 
-                        'credit_outlet'         =>  $this->outletID,
-                        'created_by'            =>  $this->userId,
-                        'created_time'          =>  $this->dateTime,
-                        'created_ip'            =>  $this->ipAddress,
+                        'credit_outlet' => $this->outletID,
+                        'created_by' => $this->userId,
+                        'created_time' => $this->dateTime,
+                        'created_ip' => $this->ipAddress,
                     ];
                 }
-                $this->db->insert_batch("stock_info",$stock_info);
+                $this->db->insert_batch("stock_info", $stock_info);
             }
 
-            if(!empty($totalAmount)){
-                $total_transaction=[
-                    'transCode'             =>  time(),
-                    'customer_member_id'    =>  $customer,
-                    'sales_id'              =>  $insert_id,
-                    'payment_by'            =>  NULL,
-                    'credit_amount'          =>  $totalAmount,
-                    'created_by'            =>  $this->userId,
-                    'created_time'          =>  $this->dateTime,
-                    'created_ip'            =>  $this->ipAddress,
+            if (!empty($totalAmount)) {
+                $total_transaction = [
+                    'transCode' => time(),
+                    'customer_member_id' => $customer,
+                    'sales_id' => $insert_id,
+                    'payment_by' => NULL,
+                    'credit_amount' => $totalAmount,
+                    'created_by' => $this->userId,
+                    'created_time' => $this->dateTime,
+                    'created_ip' => $this->ipAddress,
                 ];
-                $this->db->insert("transaction_info",$total_transaction);
-                $parent_id=$this->db->insert_id();
+                $this->db->insert("transaction_info", $total_transaction);
+                $parent_id = $this->db->insert_id();
             }
-            if(!empty($paidNow)){
-                $payment_transaction=[
-                    'transCode'                 =>  time(),
-                    'customer_member_id'        =>  $customer,
-                    'sales_id'                  =>  $insert_id,
-                    'payment_by'                =>  (!empty($payment_byInfo)?json_encode($payment_byInfo):''),
-                    'debit_amount'              =>  $paidNow,
-                    'bank_id'                   =>  $receivedBankAcc,
-                    'parent_id'                 =>  $parent_id,
-                    'created_by'                =>  $this->userId,
-                    'created_time'              =>  $this->dateTime,
-                    'created_ip'                =>  $this->ipAddress,
+            if (!empty($paidNow)) {
+                $payment_transaction = [
+                    'transCode' => time(),
+                    'customer_member_id' => $customer,
+                    'sales_id' => $insert_id,
+                    'payment_by' => (!empty($payment_byInfo) ? json_encode($payment_byInfo) : ''),
+                    'debit_amount' => $paidNow,
+                    'bank_id' => $receivedBankAcc,
+                    'parent_id' => $parent_id,
+                    'created_by' => $this->userId,
+                    'created_time' => $this->dateTime,
+                    'created_ip' => $this->ipAddress,
                 ];
-                $this->db->insert("transaction_info",$payment_transaction);
+                $this->db->insert("transaction_info", $payment_transaction);
             }
+
+
+            // for SMS System
+            $posConfig = $this->SETTINGS->posConfig();
+            if (!empty($posConfig->is_sms_costing) && $posConfig->is_sms_costing == 1){
+                $smsText = (!empty($posConfig->smsText)?json_decode($posConfig->smsText,true):'');;
+                $sms        = !empty($smsText['sales'])?$smsText['sales']:"";
+                $remove     = array("[amount]", "[transId]", "[date]");
+                $add        = array($totalAmount, $invNo, $saleDate);
+                $salesSms   = str_replace($remove, $add, $sms);
+
+                $mobileNumber= (!empty($customerInfo->mobile)?substr($customerInfo->mobile, -11):'');
+                if(strlen($mobileNumber)==11) {
+                    $sms = [
+                        'receiverType'  => 1,
+                        'reference_id'  => $customerInfo->id,
+                        'mobile_number' => $mobileNumber,
+                        'msg'           => $salesSms,
+                        'send_status'   => 1,
+                    ];
+                    $this->SMS->smsStore($sms);
+                }
+            }
+
+
 
             $redierct_page="pos/show/".$insert_id;
-
-
             $this->db->trans_complete();
             if($this->db->trans_status()===true){
                 echo json_encode(['status'=>'success','message'=>"Successfully Save Information.",'redirect_page'=>$redierct_page]);

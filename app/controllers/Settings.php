@@ -280,12 +280,10 @@ class Settings extends CI_Controller
         }
     }
    
-
+/*
     public function sendSmsJob(){
        
         $get_all_pending_sms=$this->SETTINGS->get_all_pending_sms();
-        
-       
         $i=1;
         $sms_hisotry=[];
         if(!empty($get_all_pending_sms)){
@@ -301,7 +299,7 @@ class Settings extends CI_Controller
             print_r($sms_hisotry);
         }
     }
-
+*/
     
     public function get_sms_report(){
         $data['sms_info'] = $this->SETTINGS->get_sms_info();
@@ -503,21 +501,25 @@ class Settings extends CI_Controller
         if(empty($status)){
             echo json_encode(['status'=>'error','message'=>'Status is required','data'=>'']);exit;
         }
+        if(empty($openingBalanceType)){
+            echo json_encode(['status'=>'error','message'=>'Opening Amount Type is required','data'=>'']);exit;
+        }
+
         $customer_info=[];
         if(empty($upId)) {
             $info = array(
-                'type' => $type,
-                'outlet_id' => $this->outletID,
-                'name' => $name,
-                'mobile' =>(!empty($mobile)?$mobile:''),
-                'email' => (!empty($email)?$email:''),
+                'type'          => $type,
+                'outlet_id'     => $this->outletID,
+                'name'          => $name,
+                'mobile'        =>(!empty($mobile)?$mobile:''),
+                'email'         => (!empty($email)?$email:''),
                 'date_of_birth' => (!empty($customer_date_of_birth)?date('Y-m-d',strtotime($customer_date_of_birth)):''),
-                'address' => (!empty($address)?$address:''),
-                'remarks' => (!empty($remarks)?$remarks:''),
-                'is_active' => (!empty($status)?$status:''),
-                'created_by' => $this->userId,
-                'created_time' => $this->dateTime,
-                'created_ip' => $this->ipAddress,
+                'address'       => (!empty($address)?$address:''),
+                'remarks'       => (!empty($remarks)?$remarks:''),
+                'is_active'     => (!empty($status)?$status:''),
+                'created_by'    => $this->userId,
+                'created_time'  => $this->dateTime,
+                'created_ip'    => $this->ipAddress,
             );
             $this->db->insert("customer_shipment_member_info", $info);
             $customer_id=$this->db->insert_id();
@@ -525,15 +527,22 @@ class Settings extends CI_Controller
 
             $payment_transaction=[
                 'customer_member_id'        =>  $customer_id,
-                'credit_amount'             =>  (!empty($openingDue)?$openingDue:'0.00'),
                 'payment_date'              =>  date('Y-m-d'),
-                'type'                      =>  10,
                 'remarks'                   =>  (!empty($remarks)?$remarks:''),
                 'is_opening_balance'        =>  2,
                 'created_by'                =>  $this->userId,
                 'created_time'              =>  $this->dateTime,
                 'created_ip'                =>  $this->ipAddress,
             ];
+            if(!empty($openingBalanceType) && $openingBalanceType==1){ // Opening Due
+                $payment_transaction['credit_amount']   = (!empty($openingDue)?$openingDue:'0.00');
+                $payment_transaction['type']            = 10;
+            }elseif(!empty($openingBalanceType) &&  $openingBalanceType==2){ // Opening Deposited
+                $payment_transaction['debit_amount']    = (!empty($openingDue)?$openingDue:'0.00');
+                $payment_transaction['type']            = 9;
+            }else{
+                echo json_encode(['status'=>'error','message'=>'Opening Amount Type is required','data'=>'']);exit;
+            }
             $this->db->insert("transaction_info",$payment_transaction);
 
             $message='Successfully Save Information';
@@ -562,32 +571,51 @@ class Settings extends CI_Controller
             $this->db->where('id',$upId);
             $this->db->update("customer_shipment_member_info", $info);
 
-            $getOpeningBal=$this->REPORT->get_single_transaction_info(['transaction_info.customer_member_id'=>$upId,'transaction_info.type'=>10,'transaction_info.is_opening_balance'=>2]);
+            $getOpeningBal=$this->REPORT->get_single_transaction_info(['transaction_info.customer_member_id'=>$upId,'transaction_info.is_opening_balance'=>2]);
 
-            if(empty($getOpeningBal)){
-                $payment_transaction=[
-                    'customer_member_id'        =>  $upId,
-                    'credit_amount'             =>  (!empty($openingDue)?$openingDue:'0.00'),
-                    'payment_date'              =>  date('Y-m-d'),
-                    'type'                      =>  10,
-                    'remarks'                   =>  (!empty($remarks)?$remarks:''),
-                    'is_opening_balance'        =>  2,
-                    'created_by'                =>  $this->userId,
-                    'created_time'              =>  $this->dateTime,
-                    'created_ip'                =>  $this->ipAddress,
-                ];
-                $this->db->insert("transaction_info",$payment_transaction);
-            }else {
+
+            if (empty($getOpeningBal)) {
                 $payment_transaction = [
-                    'credit_amount' => (!empty($openingDue)?$openingDue:'0.00'),
-                    'remarks' => (!empty($remarks) ? $remarks : ''),
-                    'updated_by' => $this->userId,
-                    'updated_time' => $this->dateTime,
-                    'updated_ip' => $this->ipAddress,
+                    'customer_member_id'        => $upId,
+                    'payment_date'              => date('Y-m-d'),
+                    'remarks'                   => (!empty($remarks) ? $remarks : ''),
+                    'is_opening_balance'        => 2,
+                    'created_by'                => $this->userId,
+                    'created_time'              => $this->dateTime,
+                    'created_ip'                => $this->ipAddress,
                 ];
-                $this->db->where(['customer_member_id' => $upId, 'type' => 10, 'is_opening_balance' => 2]);
+                if(!empty($openingBalanceType) && $openingBalanceType==1){ // Opening Due
+                    $payment_transaction['credit_amount']   = (!empty($openingDue)?$openingDue:'0.00');
+                    $payment_transaction['type']            = 10;
+                }elseif(!empty($openingBalanceType) &&  $openingBalanceType==2){ // Opening Deposited
+                    $payment_transaction['debit_amount']    = (!empty($openingDue)?$openingDue:'0.00');
+                    $payment_transaction['type']            = 9;
+                }
+
+                $this->db->insert("transaction_info", $payment_transaction);
+
+            } else {
+                $payment_transaction = [
+                    'remarks'                   => (!empty($remarks) ? $remarks : ''),
+                    'updated_by'                => $this->userId,
+                    'updated_time'              => $this->dateTime,
+                    'updated_ip'                => $this->ipAddress,
+                ];
+
+                if(!empty($openingBalanceType) && $openingBalanceType==1){ // Opening Due
+                    $payment_transaction['debit_amount']    = '0.00';
+                    $payment_transaction['credit_amount']   = (!empty($openingDue)?$openingDue:'0.00');
+                    $payment_transaction['type']            = 10;
+                }elseif(!empty($openingBalanceType) &&  $openingBalanceType==2){ // Opening Deposited
+                    $payment_transaction['credit_amount']   = '0.00';
+                    $payment_transaction['debit_amount']    = (!empty($openingDue)?$openingDue:'0.00');
+                    $payment_transaction['type']            = 9;
+                }
+                $this->db->where(['customer_member_id' => $upId,'is_opening_balance' => 2]);
                 $this->db->update("transaction_info", $payment_transaction);
             }
+
+
 
             $message='Successfully Update Information';
         }
@@ -963,5 +991,89 @@ class Settings extends CI_Controller
         $data['redierct_page'] = 'expenseCtg';
         $view['content'] = $this->load->view('dashboard/settings/setting_info', $data, TRUE);
         $this->load->view('dashboard/index', $view);
+    }
+
+    public function sendSms(){
+        $getSms=$this->SETTINGS->get_all_pending_sms();
+        if(!empty($getSms[0])){
+            $sendSmsLog=[];
+            foreach ($getSms as $key=>$row){
+                if(!empty($row->mobile_number)) {
+                    $encodebangla   = utf8_encode($row->msg );
+                    $sms            = utf8_decode($encodebangla);
+
+                    $sendSmsLog[$key]['status']='';
+                    $sendSmsLog[$key] = [
+                        'mobile_no' =>  $row->mobile_number,
+                        'message'   =>  $row->msg,
+                    ];
+                    $url = 'https://www.24bulksmsbd.com/api/smsSendApi';
+                    $data = array(
+                        'customer_id'   => 66,
+                        'api_key'       => 171574717329433701673050507,
+                        'message'       => $sms,
+                        'mobile_no'     => $row->mobile_number
+                    );
+
+                    $curl = curl_init($url);
+                    curl_setopt($curl, CURLOPT_POST, true);
+                    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+                    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+                    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+                    $output = curl_exec($curl);
+                    curl_close($curl);
+                    //  dd($output);
+                    $response=(!empty($output)?json_decode($output,true):'');
+                    //   dd($response);
+                    if(!empty($response)) {
+                        $updateInfo = [
+                            'send_status'   => 2,
+                            'updated_time'  => date('Y-m-d H:i:s'),
+                            'updated_ip'    => $this->ipAddress,
+                        ];
+                        if (!empty($response['status']) && $response['status'] == 'ok') {
+                            $updateInfo['success_status']   = 1;
+                            $sendSmsLog[$key]['status']     = (!empty($response['message'])?$response['message']:'').' <> Successfully Send Sms';
+                        } else {
+                            $updateInfo['success_status']   = 2;
+                            $sendSmsLog[$key]['status']     = (!empty($response['message'])?$response['message']:''). ' <> Failed to Send Sms';
+                        }
+                    }else{
+
+                        $updateInfo['send_status']    = 2;
+                        $updateInfo['success_status'] = 2;
+                        $updateInfo['updated_at']     = date('Y-m-d H:i:s');
+
+                        $sendSmsLog[$key]['status']         = (!empty($response['message'])?$response['message']:''). ' <> Failed to Send Sms(Response NULL)';
+                    }
+                    $this->db->where('id', $row->id)->update("sms_history",$updateInfo);
+
+                }
+            }
+
+            if(!empty($sendSmsLog)){
+                $si=1;
+                echo "<table border='1px' rules='all' style='border: 1px solid #eee;'>";
+                echo "<tr>";
+                echo "<td>S/N</td>";
+                echo "<td>Mobile Number</td>";
+                echo "<td>Message</td>";
+                echo "<td>Status</td>";
+                echo "</tr>";
+                foreach ($sendSmsLog as $log){
+                    echo "<tr>";
+                    echo "<td>".$si++."</td>";
+                    echo "<td>".$log['mobile_no']."</td>";
+                    echo "<td>".$log['message']."</td>";
+                    echo "<td>".$log['status']."</td>";
+                    echo "</tr>";
+                }
+                echo "</table>";
+            }
+
+        }else{
+            echo "<h1 style='text-align: center;'>No SMS Pending here....</h1>";
+        }
     }
 }

@@ -57,7 +57,7 @@
     </div>
 </section>
 <div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
 
         <form action="" method="post" id="customerMemberInfoForm" class="form-horizontal" enctype="multipart/form-data">
             <div class="modal-content">
@@ -123,13 +123,37 @@
                     </div>
                     <div class="form-group col-sm-12">
                         <label class="col-sm-3 text-right">
-                             Opening Due
+                             Opening Balance Type
                         </label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control " name="openingDue" placeholder="Opening Due"
+                            <div class="form-check">
+                                <input class="form-check-input openingBalanceType" type="radio" name="openingBalanceType"
+                                       id="openingBalanceType1"
+                                       value="1" checked>
+                                <label class="form-check-label" for="openingBalanceType1">
+                                    Due (আপনি কাস্টমারের কাছে পাবেন)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input openingBalanceType" type="radio" name="openingBalanceType"
+                                       id="openingBalanceType2" value="2">
+                                <label class="form-check-label" for="openingBalanceType2">
+                                    Advanced (কাস্টমার আপনার কাছে পাবেন)
+                                </label>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-12">
+                        <label class="col-sm-3 text-right">
+                             Opening <span class="openingBalanceType">Due</span> Amount
+                        </label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control " name="openingDue" placeholder=" Amount"
                                    id="openingDue">
                         </div>
                     </div>
+
                     <div class="form-group col-sm-12">
                         <label class="col-sm-3 text-right">
                             Status

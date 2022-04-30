@@ -272,15 +272,25 @@ function updateCustomerMemberInfo(id) {
         success: function (response) {
             if(response.status=='success'){
                 var data=response.data;
+                console.log(data);
                 $("#outlet_id").val(data.outlet_id);
                 $("#name").val(data.name);
                 $("#mobile").val(data.mobile);
                 $("#email").val(data.email);
                 $("#address").val(data.address);
                 $("#remarks").val(data.remarks);
-                $("#openingDue").val(data.credit_amount);
+
                 $("#status").val(data.is_active);
                 $("#upId").val(data.id);
+                if(data.type==10){
+                    $("#openingBalanceType1").attr('checked',true);
+                    $("#openingBalanceType2").attr('checked',false);
+                    $("#openingDue").val(data.credit_amount);
+                }else if(data.type==9){
+                    $("#openingBalanceType1").attr('checked',false);
+                    $("#openingBalanceType2").attr('checked',true);
+                    $("#openingDue").val(data.debit_amount);
+                }
             }
         }
     });
@@ -2403,3 +2413,12 @@ function searchingDailySalesReports () {
         }
     });
 }
+
+$(document).on("change", ".openingBalanceType", function () {
+   var type= $(this).val();
+   if(type==1){
+       $(".openingBalanceType").html('Due');
+   }else{
+       $(".openingBalanceType").html('Advanced');
+   }
+});
