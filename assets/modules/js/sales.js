@@ -156,9 +156,10 @@ var addRowProduct = function (id, inventory, price, value,  productCode,unit_sal
             var id = id_arr.split("_");
             var element_id = id[id.length - 1];
             var inventory = parseFloat($("#inventory_" + element_id).val());
+            console.log(inventory);
             var price = parseFloat($("#price_" + element_id).val());
             if(!isNaN(inventory) && !isNaN(quantity) && ( quantity > inventory) ){
-                var stockmessage='Expected Qty is out of stock';
+                var stockmessage='Expected e Qty is out of stock';
                 $("#qty_" + element_id).val('1');
                 $("#sub_total_" + element_id).val((price * 1).toFixed(2));
                 $("#qty_empty_" + element_id).html(stockmessage);

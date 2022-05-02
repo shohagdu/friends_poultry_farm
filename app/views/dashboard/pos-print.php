@@ -169,53 +169,54 @@
                         <th class="text-right"><?php echo !empty($sales->net_total)? number_format
                             ($sales->net_total,2):'0.00';   ?></th>
                     </tr>
-                    <tr>
-                        <th colspan="5" class="text-right"><?php $paymentBy= !empty($sales->payment_by)? json_decode
-                            ($sales->payment_by,true):'';
+                    <?php
+                        $paymentBy= !empty($sales->payment_by)? json_decode
+                        ($sales->payment_by,true):'';
                         if(!empty($paymentBy)){
-                        ?>
-                            <table class=" table-bordered" style="width:50%;float: right;">
-                                <?php
-                                $paymentKey=[
-                                  'cash'=>'Cash',
-                                  'cash_cheque'=>'Cash Cheque',
-                                  'due_cheque'=>'Due Cheque',
-                                  'online_payment'=>'Online Payment',
-                                ];
-                                if(!empty($paymentBy)){
-                                    $ik=1;
-                                    foreach ($paymentBy as $key=> $value){
-                                ?>
-                                <tr>
+                    ?>
+                        <tr>
+                            <th colspan="5" class="text-right">
+                                <table class=" table-bordered" style="width:50%;float: right;">
                                     <?php
-                                    if($ik==1){
+                                    $paymentKey=[
+                                      'cash'=>'Cash',
+                                      'cash_cheque'=>'Cash Cheque',
+                                      'due_cheque'=>'Due Cheque',
+                                      'online_payment'=>'Online Payment',
+                                    ];
+                                    if(!empty($paymentBy)){
+                                        $ik=1;
+                                        foreach ($paymentBy as $key=> $value){
                                     ?>
-                                        <td rowspan="4" style="border:1px solid #fff;border-right:1px solid #d0d0d0;
-                                        padding-right:8px;
-">Payment By</td>
-                                    <?php } ?>
-                                    <td style="padding-right:8px; "><?php echo !empty
-                                        ($paymentKey[$key])
-                                            ?$paymentKey[$key]:''; ?></td>
-                                    <td style="width:33%;"><?php echo !empty($value)? number_format($value,2):'0.00'
-                                        ?></td>
-                                </tr>
-                                <?php  $ik++; } } ?>
-                            </table>
-                            <?php } ?>
-                        </th>
-                    </tr>
+                                    <tr>
+                                        <?php
+                                        if($ik==1){
+                                        ?>
+                                            <td rowspan="4" style="border:1px solid #fff;border-right:1px solid #d0d0d0;
+                                            padding-right:8px;
+    ">Payment By</td>
+                                        <?php } ?>
+                                        <td style="padding-right:8px; "><?php echo !empty
+                                            ($paymentKey[$key])
+                                                ?$paymentKey[$key]:''; ?></td>
+                                        <td style="width:33%;"><?php echo !empty($value)? number_format($value,2):'0.00'
+                                            ?></td>
+                                    </tr>
+                                    <?php  $ik++; } } ?>
+                                </table>
+                            </th>
+                        </tr>
+                   <?php } ?>
                     <tr>
                         <th  colspan="4"  style="text-align:right">Total Payment AMT</th>
-                        <th class="text-right"><?php echo !empty($sales->payment_amount)? number_format
-                            ($sales->payment_amount,2):'0.00';   ?></th>
+                        <th class="text-right"><?php echo !empty($sales->payment_amount)? number_format($sales->payment_amount,2):'0.00';   ?></th>
                     </tr>
 
                     <?php
                         if(!empty($sales->remaining_due_make_discount) || $sales->remaining_due_make_discount>0){
                     ?>
                         <tr>
-                            <th  colspan="4"  style="text-align:right">Remaining Due Make Discount</th>
+                            <th  colspan="4"  style="text-align:right">Less Adjustment</th>
                             <th class="text-right"><?php echo !empty($sales->remaining_due_make_discount)? number_format
                                 ($sales->remaining_due_make_discount,2):'0.00';   ?></th>
                         </tr>
@@ -251,7 +252,8 @@
 
         <div class="order_barcodes text-center">
             <div class="text-center" style="font-size: 10px "> Thank you for shopping with us. Please come again.</div>
-            <span style="font-size:9px;"><b> Copyright &copy; www.shohozit.com, Developed By Omar Shohag, Cell: 01839707645 </b></span>
+            <span style="font-size:9px;"><b> " Software &copy; shohozit.com & Developed by Shohag. Cell: 01839707645 "
+                </b></span>
         </div>
         <div style="clear:both;"></div>
     </div>
@@ -275,24 +277,8 @@
             <div class="pull-right col-xs-6">
                     <a class="btn btn-block btn-warning" href="<?php echo base_url('welcome'); ?>"><i class="glyphicon glyphicon-backward"></i>  Dashboard</a>
             </div>
-
             </div>
-
         </div>
-
-        <div style="clear:both;"></div>
-        <div class="col-xs-12" style="background:#F5F5F5; padding:10px;">
-            <p style="font-weight:bold;">
-                Please don't forget to disble the header and footer in browser print settings.
-            </p>
-            <p style="text-transform: capitalize;">
-                <strong>FF:</strong> File &gt; Print Setup &gt; Margin &amp; Header/Footer Make all --blank--
-            </p>
-            <p style="text-transform: capitalize;">
-                <strong>chrome:</strong> Menu &gt; Print &gt; Disable Header/Footer in Option &amp; Set Margins to None
-            </p>
-        </div>
-        <div style="clear:both;"></div>
     </div>
 </div>
 </body>

@@ -407,7 +407,6 @@ $(document).ready(function(){
         'columns': [
             { data: 'serial_no', orderable: true, searchable: false  },
             { data: 'name', name: 'customer_shipment_member_info.name' },
-            { data: 'outlet_name', name: 'outlet_setup.outlet_name' },
             { data: 'mobile', name: 'customer_shipment_member_info.mobile' },
             { data: 'email', name: 'customer_shipment_member_info.email'},
             { data: 'address', name: 'customer_shipment_member_info.address'},

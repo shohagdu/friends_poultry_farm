@@ -290,4 +290,26 @@ function dailySalesReports() {
         $data['info']=$this->REPORT->get_transaction_info($param);
         return  $this->load->view('dashboard/reports/expense/searchingexpReports', $data);
     }
+
+    function customerStatement() {
+        $data = array();
+        $view = array();
+        $data['title'] = "Customer Statement";
+        $outlet_id=$this->outletID;
+        $data['info']=$this->REPORT->customerStatement(['outletID'=>$outlet_id,'typeID'=>1]);
+        $view['content'] = $this->load->view('dashboard/reports/customer_member/customerStatement', $data, TRUE);
+        $this->load->view('dashboard/index', $view);
+    }
+    function supplierStatement() {
+        $data = array();
+        $view = array();
+        $data['title'] = "Customer Statement";
+        $outlet_id=$this->outletID;
+        $data['info']=$this->REPORT->supplierStatement(['outletID'=>$outlet_id,'typeID'=>2]);
+        $view['content'] = $this->load->view('dashboard/reports/customer_member/customerStatement', $data, TRUE);
+        $this->load->view('dashboard/index', $view);
+    }
+
+
+
 }

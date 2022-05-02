@@ -3,6 +3,8 @@ class Purchases_model extends CI_Model {
 
     function __construct() {
         parent::__construct();
+        $user_outlet= $this->session->userdata('outlet_data');
+        $this->outletID=$user_outlet['outlet_id'];
     }
 
     function single_purchases_info($where=null)
@@ -25,21 +27,24 @@ class Purchases_model extends CI_Model {
 
     function details_stock_info_by_id($where=null)
     {
-        $this->db->select('stock_info.*,band.title as bandTitle,source.title as sourceTitle,productType.title as ProductTypeTitle,unitInfo.title as unitTitle,product_info.name as product_name,product_info.productCode');
+        $this->db->select('stock_info.*,band.title as bandTitle,source.title as sourceTitle,productType.title as ProductTypeTitle,unitInfo.title as unitTitle,product_info.name as product_name,product_info.productCode,(SUM(debitInfo.total_item)-SUM(creditInfo.total_item)) as currentItemStock');
         $this->db->from('stock_info');
         if(!empty($where)){
             $this->db->where($where);
         }
-        $this->db->join(' product_info', 'product_info.id = stock_info.product_id', 'left');
-        $this->db->join(' all_settings_info as band', 'band.id = product_info.band_id', 'left');
+        $this->db->join('product_info', 'product_info.id = stock_info.product_id', 'left');
+        $this->db->join('all_settings_info as band', 'band.id = product_info.band_id', 'left');
         $this->db->join('all_settings_info as source', 'source.id = product_info.source_id', 'left');
-        $this->db->join(' all_settings_info as productType', 'productType.id = product_info.product_type', 'left');
-        $this->db->join(' all_settings_info as unitInfo', 'unitInfo.id = product_info.unit_id', 'left');
+        $this->db->join('all_settings_info as productType', 'productType.id = product_info.product_type', 'left');
+        $this->db->join('all_settings_info as unitInfo', 'unitInfo.id = product_info.unit_id', 'left');
+
+        $this->db->join('stock_info as debitInfo', "debitInfo.product_id = product_info.id AND debitInfo.stock_type=1 AND debitInfo.is_active=1  ", 'left');
+        $this->db->join('stock_info as creditInfo', "creditInfo.product_id = product_info.id AND creditInfo.stock_type=2  AND creditInfo.is_active=1", 'left');
 
         $this->db->where('stock_info.is_active',1);
         $query_result = $this->db->get();
         if($query_result->num_rows()>0) {
-          return  $result = $query_result->result();
+          return  $query_result->result();
         }else{
             return false;
         }

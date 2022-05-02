@@ -28,18 +28,17 @@
                     </div>
                     <table id="customerMemberInfo" class='display dataTable table table-bordered table-hover' >
                         <thead>
-                        <tr>
-                            <th style="width:5%;">SL.</th>
-                            <th>Name</th>
-                            <th>Outlet</th>
-                            <th>Mobile</th>
-                            <th>Email</th>
-                            <th>Address</th>
-                            <th>Remarks</th>
-                            <th>Current Due Amount</th>
-                            <th>Status</th>
-                            <th style="width:15%;">Action</th>
-                        </tr>
+                            <tr>
+                                <th style="width:5%;">SL.</th>
+                                <th>Name</th>
+                                <th>Mobile</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Remarks</th>
+                                <th>Current Due Amount</th>
+                                <th>Status</th>
+                                <th style="width:15%;">Action</th>
+                            </tr>
                         </thead>
                         <tbody>
 

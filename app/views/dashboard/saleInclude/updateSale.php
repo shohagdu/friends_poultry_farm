@@ -135,7 +135,11 @@ include ('salesHeader.php')
                                                             >
                                                             <input id="productID_<?php echo (!empty($productInfo->id)?$productInfo->id:'') ?>" name="productID[]" value="<?php echo (!empty($productInfo->product_id)?$productInfo->product_id:'') ?>" type="hidden">
 
-                                                            <input id="inventory_<?php echo (!empty($productInfo->id)?$productInfo->id:'') ?>" name="invantory[]" value="<?php echo (!empty($productInfo->currentItemStock)?$productInfo->currentItemStock+$productInfo->total_item:$productInfo->total_item) ?>" type="hidden">
+                                                            <input id="inventory_<?php echo (!empty($productInfo->id)
+                                                                ?$productInfo->id:'') ?>" name="invantory[]"
+                                                                   value="<?php echo (!empty
+                                                                   ($productInfo->currentItemStock)
+                                                                       ?$productInfo->currentItemStock+$productInfo->total_item:$productInfo->total_item) ?>" type="hidden">
                                                         </td>
                                                         <td style="width:15%;text-align:center;"  class=" appenTd" style="width:20%" id="total_<?php echo (!empty($productInfo->id)?$productInfo->id:'') ?>">
                                                             <input id="sub_total_<?php echo (!empty($productInfo->id)?$productInfo->id:'') ?>" name="sub_total[]" class="totalprice" readonly style="text-align: center;height:30px;" value="<?php echo (!empty($productInfo->total_price)?$productInfo->total_price:'') ?>" tabindex="-1"   type="text">

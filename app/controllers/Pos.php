@@ -487,6 +487,7 @@ class Pos extends CI_Controller
     function update($id){
         $data['sales']      = $this->POS->get_single_sales_infoSha1($id);
         $data['accounts']   = $this->CASHBOOK->accounts();
+
         $this->load->view('dashboard/saleInclude/updateSale', $data);
     }
 }

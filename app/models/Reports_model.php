@@ -323,5 +323,80 @@ class Reports_model extends CI_Model {
             return false;
         }
     }
+    function customerStatement($postData=null){
+        // Custom search filter
+
+        $outletID = !empty($postData['outletID'])?$postData['outletID']:'';
+        $typeID = !empty($postData['typeID'])?$postData['typeID']:'';
+        $customerName = !empty($postData['customerName'])?$postData['customerName']:'';
+
+        if (!empty($outletID)) {
+            $search_arr[] = " customer_shipment_member_info.outlet_id='" . $outletID . "' ";
+        }
+        if (!empty($typeID)) {
+            $search_arr[] = " customer_shipment_member_info.type='" . $typeID . "' ";
+        }
+        if (!empty($customerName)) {
+            $search_arr[] = " customer_shipment_member_info.name like '%" . $customerName . "%' ";
+        }
+
+        $search_arr[] = " customer_shipment_member_info.is_active != 0 ";
+        if(count($search_arr) > 0){
+            $searchQuery = implode(" and ",$search_arr);
+        }
+
+        $this->db->select("customer_shipment_member_info.*,outlet_setup.name as outlet_name,outlet_setup.address as outlet_address ,sum(t.debit_amount) as total_debit,sum(t.credit_amount)  as total_credit,(SUM(IF(t.credit_amount != '' , t.credit_amount,0))  -  SUM(IF(t.debit_amount != '' , t.debit_amount,0))) as current_due",false);
+        if($searchQuery != ''){
+            $this->db->where($searchQuery);
+        }
+        $this->db->join('outlet_setup', 'outlet_setup.id = customer_shipment_member_info.outlet_id', 'left');
+        $this->db->join('transaction_info as t', 't.customer_member_id = customer_shipment_member_info.id', 'left');
+        $this->db->group_by("customer_shipment_member_info.id");
+        $this->db->order_by("current_due", "DESC");
+        $records = $this->db->get('customer_shipment_member_info');
+        if($records->num_rows()>0) {
+            return $records->result();
+        }else{
+            return false;
+        }
+    }
+    function supplierStatement($postData=null){
+        // Custom search filter
+
+        $outletID = !empty($postData['outletID'])?$postData['outletID']:'';
+        $typeID = !empty($postData['typeID'])?$postData['typeID']:'';
+        $customerName = !empty($postData['customerName'])?$postData['customerName']:'';
+
+        if (!empty($outletID)) {
+            $search_arr[] = " customer_shipment_member_info.outlet_id='" . $outletID . "' ";
+        }
+        if (!empty($typeID)) {
+            $search_arr[] = " customer_shipment_member_info.type='" . $typeID . "' ";
+        }
+        if (!empty($customerName)) {
+            $search_arr[] = " customer_shipment_member_info.name like '%" . $customerName . "%' ";
+        }
+
+        $search_arr[] = " customer_shipment_member_info.is_active != 0 ";
+        if(count($search_arr) > 0){
+            $searchQuery = implode(" and ",$search_arr);
+        }
+
+        $this->db->select("customer_shipment_member_info.*,outlet_setup.name as outlet_name,outlet_setup.address as outlet_address ,sum(t.debit_amount) as total_debit,sum(t.credit_amount)  as total_credit,(SUM(IF(t.debit_amount != '' , t.debit_amount,0))  -  SUM(IF(t.credit_amount != '' , t.credit_amount,0))) as current_due",false);
+        if($searchQuery != ''){
+            $this->db->where($searchQuery);
+        }
+        $this->db->join('outlet_setup', 'outlet_setup.id = customer_shipment_member_info.outlet_id', 'left');
+        $this->db->join('transaction_info as t', 't.customer_member_id = customer_shipment_member_info.id', 'left');
+        $this->db->group_by("customer_shipment_member_info.id");
+        $this->db->order_by("current_due", "DESC");
+        $records = $this->db->get('customer_shipment_member_info');
+        if($records->num_rows()>0) {
+            return $records->result();
+        }else{
+            return false;
+        }
+    }
+
 
 }
