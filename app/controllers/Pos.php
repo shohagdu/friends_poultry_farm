@@ -44,8 +44,6 @@ class Pos extends CI_Controller
     }
 
     public function save_sales_info(){
-
-
         extract($_POST);
         $payment_byInfo=[];
         if(!empty($payment_by)){
@@ -99,10 +97,11 @@ class Pos extends CI_Controller
                 'created_time' => $this->dateTime,
                 'created_ip' => $this->ipAddress,
             ];
-            //print_r($sales_info);
+
             $this->db->insert("sales_info", $sales_info);
             $insert_id = $this->db->insert_id();
             // $insert_id=1;
+            $stock_info=[];
             if (!empty($productID)) {
                 foreach ($productID as $key => $product) {
                     $purchaseAmtForSales = $this->PRODUCTS->get_single_product_info(['product_info.id' => $product]);
@@ -158,6 +157,7 @@ class Pos extends CI_Controller
 
 
             // for SMS System
+            /*
             $posConfig = $this->SETTINGS->posConfig();
             if (!empty($posConfig->is_sms_costing) && $posConfig->is_sms_costing == 1){
                 $smsText = (!empty($posConfig->smsText)?json_decode($posConfig->smsText,true):'');;
@@ -178,7 +178,7 @@ class Pos extends CI_Controller
                     $this->SMS->smsStore($sms);
                 }
             }
-
+            */
 
 
             $redierct_page="pos/show/".$insert_id;

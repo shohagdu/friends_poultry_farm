@@ -42,6 +42,7 @@ class Purchases_model extends CI_Model {
         $this->db->join('stock_info as creditInfo', "creditInfo.product_id = product_info.id AND creditInfo.stock_type=2  AND creditInfo.is_active=1", 'left');
 
         $this->db->where('stock_info.is_active',1);
+        $this->db->group_by('product_info.id');
         $query_result = $this->db->get();
         if($query_result->num_rows()>0) {
           return  $query_result->result();
