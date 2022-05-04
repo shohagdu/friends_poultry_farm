@@ -52,7 +52,9 @@
                 <td><i class="badge"><?php echo $payment=(!empty($row->payment_amount)?$row->payment_amount:'0.00'); $paymentAmt+=$row->payment_amount; ?></i></td>
                 <td><i class="badge"><?php echo $purchaseAmt=(!empty($row->getPurchaseAmount)?$row->getPurchaseAmount:'0.00'); $tCosting+=$row->getPurchaseAmount; ?></i></td>
                 <td><i class="badge">
-                        <?php echo $profitLose=(!empty($row->net_total)?($payment-$purchaseAmt):'0.00');  $tProfitLose+=$profitLose; ?>
+                        <?php  $profitLose=(!empty($row->net_total)?($netTotal-$purchaseAmt):'0.00');
+                        echo number_format($netTotal,2);
+                        $tProfitLose+=$profitLose; ?>
                     </i>
                 </td>
             </tr>

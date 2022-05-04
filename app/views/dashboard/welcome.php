@@ -10,15 +10,46 @@
                         <div class="small-box bg-aqua">
                             <div class="inner">
                                 <div style="height:35px;">
-                                    <h4 style=" text-align: center"><?php echo (!empty($todaySalesInfo)?$todaySalesInfo:'0.00') ?></h4>
+                                    <h3 style=" text-align: center;font-weight: bold;"><?php echo (!empty
+                                        ($todaySalesInfo->totalSale)
+                                            ?$todaySalesInfo->totalSale:'0.00') ?></h3>
                                 </div>
                                 <hr>
-                                <p style="font-size: 14px; text-align: center">TODAY SALES </p>
+                                <p style="font-size: 18px; text-align: center;font-weight: bold">TODAY SALES </p>
                             </div>
-
                         </div>
                     </div>
+
                 </a>
+                <?php
+                $bg=[
+                        3   =>  'bg-yellow',
+                        7   =>  'bg-green',
+                        8   =>  'bg-yellow',
+                        11  =>  'bg-green',
+                        12  =>  'bg-yellow',
+                ];
+                if(!empty($transSummery)){
+                    foreach ($transSummery as $sumKey=> $summery){
+                ?>
+                        <div class="col-md-4">
+                            <div class="small-box <?php echo (!empty($bg[$sumKey])?$bg[$sumKey]:''); ?>">
+                                <div class="inner">
+                                    <div style="height:35px;">
+                                        <h3 style=" text-align: center;font-weight: bold;"><?php echo (!empty($summery)
+                                                ?$summery:'0.00') ?></h3>
+                                    </div>
+                                    <hr>
+                                    <p style="font-size: 18px; text-align: center;font-weight: bold"><?php echo (!empty
+                                        ($transactionType[$sumKey])
+                                            ?$transactionType[$sumKey]:''); ?> </p>
+                                </div>
+                            </div>
+                        </div>
+                <?php
+                    }
+                }
+                ?>
             </div>
         </div>
     </section>

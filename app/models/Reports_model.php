@@ -189,7 +189,7 @@ class Reports_model extends CI_Model {
         }
     }
     function todaySalesInfo($where=NULL){
-        $this->db->select('sum(net_total) as totalBill, sum(payment_amount) as totalCollectionAmt',true);
+        $this->db->select('sum(net_total) as totalSale, sum(payment_amount) as totalCollectionAmt,',true);
         if(!empty($where['firstDate'])){
             $this->db->where("sales_date >=", $where['firstDate']);
             $this->db->where("sales_date <=", $where['toDate']);
@@ -198,10 +198,7 @@ class Reports_model extends CI_Model {
 
         $records = $this->db->get('sales_info');
         if($records->num_rows()>0) {
-            $result = $records->row();
-            if(!empty($result)) {
-                return (!empty($result->totalCollectionAmt)?$result->totalCollectionAmt:'0.00');
-            }
+            return $records->row();
         }else{
             return '0.00';
         }
@@ -461,6 +458,32 @@ class Reports_model extends CI_Model {
         }
         $this->db->join("customer_shipment_member_info as member","member.id=transaction_info.customer_member_id","left");
         $this->db->order_by("transaction_info.id", "ASC");
+        $records = $this->db->get('transaction_info');
+        if($records->num_rows()>0) {
+            return $records->result();
+        }else{
+            return false;
+        }
+    }
+
+
+    public function summeryReportsOfTransaction($postData){
+        $search_arr[] = "  transaction_info.is_active = 1 ";
+        if(count($search_arr) > 0){
+            $searchQuery = implode(" and ",$search_arr);
+        }
+        $this->db->select("transaction_info.type,SUM(IF(debit_amount>0,debit_amount,credit_amount)) as amount");
+        if($searchQuery != ''){
+            $this->db->where($searchQuery);
+        }
+        if(empty($postData['firstDate'])){
+            $this->db->where('payment_date',date('Y-m-d'));
+        }else{
+            $this->db->where("payment_date >=", $postData['firstDate']);
+            $this->db->where("payment_date <=", $postData['toDate']);
+        }
+        $this->db->where_in("transaction_info.type",[3,7,8,9,10,11,12]);
+        $this->db->group_by("transaction_info.type");
         $records = $this->db->get('transaction_info');
         if($records->num_rows()>0) {
             return $records->result();
