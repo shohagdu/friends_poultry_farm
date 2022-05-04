@@ -689,5 +689,54 @@ COUNT(CASE WHEN success_status = 2 THEN success_status ELSE NULL END) failed_sms
         ];
     }
 
+    public function customerDueCollection($postData){
 
+        $search_arr[] = "  transaction_info.is_active = 1 ";
+       // $search_arr[] = "  transaction_info.outletID =  ".$this->outletID;
+
+        // Custom search filter
+        $customerID         = !empty($postData['customerID'])?$postData['customerID']:'';
+        $transactionType    = !empty($postData['transactionType'])?$postData['transactionType']:'';
+
+        if (!empty($customerID)) {
+            $search_arr[] = " transaction_info.customer_member_id = " . $customerID ;
+        }
+        if (!empty($transactionType)) {
+            $search_arr[] = " transaction_info.type = " . $transactionType ;
+        }else{
+            $search_arr[] = "  transaction_info.type IN (3,11,12) ";
+        }
+        if(count($search_arr) > 0){
+            $searchQuery = implode(" and ",$search_arr);
+        }
+        $this->db->select("transaction_info.*,outlet_setup.name as outlet_name,concat(customer_shipment_member_info.name ,' [',customer_shipment_member_info.mobile,']') as customer_info ", FALSE);
+        if($searchQuery != ''){
+            $this->db->where($searchQuery);
+        }
+        if(empty($postData['firstDate'])){
+            $this->db->where('payment_date',date('Y-m-d'));
+        }else{
+            $this->db->where("payment_date >=", $postData['firstDate']);
+            $this->db->where("payment_date <=", $postData['toDate']);
+        }
+        $this->db->join('outlet_setup', 'outlet_setup.id = transaction_info.outletID', 'left');
+        $this->db->join('customer_shipment_member_info', 'customer_shipment_member_info.id = transaction_info.customer_member_id', 'left');
+        $this->db->order_by("transaction_info.id", "ASC");
+        $records = $this->db->get('transaction_info')->result();
+        //return $this->db->last_query();
+        $data = array();
+        $i=(!empty($start)?$start+1:1);
+        if(!empty($records)) {
+            $transType = self::transactionType();
+            foreach ($records as $key => $record) {
+                $data[] = $record;
+                $data[$key]->serial_no      = (int) $i++;
+                 $data[$key]->transType      = (!empty($transType[$record->type])?$transType[$record->type]:'-');
+                $data[$key]->amount         = !empty($record->debit_amount)?$record->debit_amount:(!empty
+                ($record->credit_amount)?$record->credit_amount:'');
+                $data[$key]->payment_date   = date('d M, Y',strtotime($record->payment_date));
+            }
+        }
+        return $data;
+    }
 }

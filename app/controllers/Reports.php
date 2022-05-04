@@ -303,10 +303,29 @@ function dailySalesReports() {
     function supplierStatement() {
         $data = array();
         $view = array();
-        $data['title'] = "Customer Statement";
+        $data['title'] = "Supplier Statement";
         $outlet_id=$this->outletID;
         $data['info']=$this->REPORT->supplierStatement(['outletID'=>$outlet_id,'typeID'=>2]);
         $view['content'] = $this->load->view('dashboard/reports/customer_member/customerStatement', $data, TRUE);
+        $this->load->view('dashboard/index', $view);
+    }
+    function dailyStatements() {
+        $data = array();
+        $view = array();
+        $data['title']                  = "Daily Statement";
+        $outlet_id                      = $this->outletID;
+        $data['sales']                  = $this->REPORT->dailySalesReport('',$outlet_id);
+        $data['customerCollection']     = $this->SETTINGS->customerDueCollection('');
+        $data['purchaseInfo']           = $this->REPORT->purchaseStatement('',$outlet_id);
+        $data['supplierPayment']        = $this->REPORT->supplierPayment('');
+        $expParam['transaction_info.type']             = 8;
+        $expParam['transaction_info.payment_date']     = date('Y-m-d');
+        $data['expense']                                = $this->REPORT->get_transaction_info($expParam);
+
+
+
+
+        $view['content'] = $this->load->view('dashboard/reports/statement/dailyStatements', $data, TRUE);
         $this->load->view('dashboard/index', $view);
     }
 

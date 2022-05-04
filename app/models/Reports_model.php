@@ -361,12 +361,9 @@ class Reports_model extends CI_Model {
         }
     }
     function supplierStatement($postData=null){
-        // Custom search filter
-
-        $outletID = !empty($postData['outletID'])?$postData['outletID']:'';
-        $typeID = !empty($postData['typeID'])?$postData['typeID']:'';
-        $customerName = !empty($postData['customerName'])?$postData['customerName']:'';
-
+        $outletID       = !empty($postData['outletID'])?$postData['outletID']:'';
+        $typeID         = !empty($postData['typeID'])?$postData['typeID']:'';
+        $customerName   = !empty($postData['customerName'])?$postData['customerName']:'';
         if (!empty($outletID)) {
             $search_arr[] = " customer_shipment_member_info.outlet_id='" . $outletID . "' ";
         }
@@ -397,6 +394,81 @@ class Reports_model extends CI_Model {
             return false;
         }
     }
+    public function purchaseStatement($postData){
+        $outletName       = (!empty($postData['outletID'])?$postData['outletID']:$this->outletID);
+        $purchaseNo       = (!empty($postData['purchaseID'])?$postData['purchaseID']:'');
+        $search_arr[] = " purchase_info_stock_in.outlet_id = " . $outletName ;
+        if (!empty($purchaseNo)) {
+            $search_arr[] = " purchase_info_stock_in.purchase_id = '" . $purchaseNo."'" ;
+        }
+        $search_arr[] = " purchase_info_stock_in.is_active = 1 ";
+        if(count($search_arr) > 0){
+            $searchQuery = implode(" and ",$search_arr);
+        }
+
+        $this->db->select("
+        purchase_info_stock_in.id, 
+        purchase_info_stock_in.purchase_id, 
+        purchase_info_stock_in.purchase_date, 
+        purchase_info_stock_in.purchase_date, 
+        purchase_info_stock_in.note, 
+        purchase_info_stock_in.is_active, 
+        outlet_setup.name as outlet_name, GROUP_CONCAT(product_info.productCode SEPARATOR ', ' ) as productCodesInfo,sum(stock_info.total_price) as sumTotalPurchase,customer_shipment_member_info.name as supplierName,customer_shipment_member_info.mobile as supplierMobile,customer_shipment_member_info.address as supplierAddress", false);
+        if($searchQuery != ''){
+            $this->db->where($searchQuery);
+        }
+        if(empty($postData['firstDate'])){
+            $this->db->where('purchase_date',date('Y-m-d'));
+        }else{
+            $this->db->where("purchase_date >=", $postData['firstDate']);
+            $this->db->where("purchase_date <=", $postData['toDate']);
+        }
+        $this->db->join('outlet_setup', 'outlet_setup.id = purchase_info_stock_in.outlet_id', 'left');
+        $this->db->join('stock_info', 'stock_info.purchase_id=purchase_info_stock_in.id AND stock_info.is_active=1', 'left');
+        $this->db->join('product_info', 'product_info.id=stock_info.product_id', 'inner');
+        $this->db->join('customer_shipment_member_info', ' customer_shipment_member_info.id=purchase_info_stock_in.supplier_id', 'inner');
+
+        $this->db->order_by("purchase_info_stock_in.id", "ASC");
+        $records = $this->db->get('purchase_info_stock_in');
+        if($records->num_rows()>0) {
+            return $records->result();
+        }else{
+            return false;
+        }
+    }
+
+    public function supplierPayment($postData){
+
+        $memberID = !empty($postData['member'])?$postData['member']:'';
+        if (!empty($memberID)) {
+            $search_arr[] = " transaction_info.customer_member_id='" . $memberID . "' ";
+        }
+        $search_arr[] = "  transaction_info.type = 7 ";
+        $search_arr[] = "  transaction_info.is_active = 1 ";
+
+        if(count($search_arr) > 0){
+            $searchQuery = implode(" and ",$search_arr);
+        }
+        $this->db->select("transaction_info.*,concat(member.name,' (',member.address,')') as member_name,member.mobile,member.email,member.address");
+        if($searchQuery != ''){
+            $this->db->where($searchQuery);
+        }
+        if(empty($postData['firstDate'])){
+            $this->db->where('payment_date',date('Y-m-d'));
+        }else{
+            $this->db->where("payment_date >=", $postData['firstDate']);
+            $this->db->where("payment_date <=", $postData['toDate']);
+        }
+        $this->db->join("customer_shipment_member_info as member","member.id=transaction_info.customer_member_id","left");
+        $this->db->order_by("transaction_info.id", "ASC");
+        $records = $this->db->get('transaction_info');
+        if($records->num_rows()>0) {
+            return $records->result();
+        }else{
+            return false;
+        }
+    }
+
 
 
 }
