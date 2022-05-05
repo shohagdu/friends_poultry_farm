@@ -225,11 +225,15 @@ class Settings extends CI_Controller
             $this->session->set_flashdata('msg', '<div style="text-align: center;font-weight:bold;padding-bottom: 5px;padding-top:10px;">Update ID is required</div>');
             redirect(base_url('settings/PosConfigIndex'));
         }
+
+        $message['sales']           =   (!empty($salesMessage)?$salesMessage:'');
+        $message['payment']         =   (!empty($paymentMessage)?$paymentMessage:'');
         $data=[
             'company_info'=>$shopName,
             'address'=>$address,
             'contactNo'=>$contact_info,
             'contactPerson'=>$contact_person,
+            'smsText'=>(!empty($message)?json_encode($message,JSON_UNESCAPED_UNICODE):''),
             'updated_by'=>$this->userId,
             'updated_time'=>$this->dateTime,
             'updated_ip'=>$this->ipAddress,
