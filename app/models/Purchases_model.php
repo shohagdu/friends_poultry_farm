@@ -120,7 +120,7 @@ class Purchases_model extends CI_Model {
         }
         $this->db->join('outlet_setup', 'outlet_setup.id = purchase_info_stock_in.outlet_id', 'left');
         $this->db->join('customer_shipment_member_info', 'customer_shipment_member_info.id = purchase_info_stock_in.supplier_id', 'left');
-        $this->db->join('transaction_info', 'transaction_info.purchase_id = purchase_info_stock_in.id', 'inner');
+        $this->db->join('transaction_info', 'transaction_info.purchase_id = purchase_info_stock_in.id', 'left');
 
 
         $this->db->group_by("purchase_info_stock_in.id");
