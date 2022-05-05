@@ -316,7 +316,7 @@ function dailySalesReports() {
         $outlet_id                      = $this->outletID;
         $data['sales']                  = $this->REPORT->dailySalesReport('',$outlet_id);
         $data['customerCollection']     = $this->SETTINGS->customerDueCollection('');
-        $data['purchaseInfo']           = $this->REPORT->purchaseStatement('',$outlet_id);
+        $data['purchaseInfo']           = $this->REPORT->purchaseStatement('');
         $data['supplierPayment']        = $this->REPORT->supplierPayment('');
         $expParam['transaction_info.type']             = 8;
         $expParam['transaction_info.payment_date']     = date('Y-m-d');

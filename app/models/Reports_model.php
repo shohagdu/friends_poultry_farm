@@ -425,8 +425,10 @@ class Reports_model extends CI_Model {
         $this->db->join('product_info', 'product_info.id=stock_info.product_id', 'inner');
         $this->db->join('customer_shipment_member_info', ' customer_shipment_member_info.id=purchase_info_stock_in.supplier_id', 'inner');
 
+        $this->db->group_by("purchase_info_stock_in.id");
         $this->db->order_by("purchase_info_stock_in.id", "ASC");
         $records = $this->db->get('purchase_info_stock_in');
+      //  return $this->db->last_query();
         if($records->num_rows()>0) {
             return $records->result();
         }else{
@@ -482,7 +484,7 @@ class Reports_model extends CI_Model {
             $this->db->where("payment_date >=", $postData['firstDate']);
             $this->db->where("payment_date <=", $postData['toDate']);
         }
-        $this->db->where_in("transaction_info.type",[3,7,8,9,10,11,12]);
+        $this->db->where_in("transaction_info.type",[3,6,7,8,9,10,11,12]);
         $this->db->group_by("transaction_info.type");
         $records = $this->db->get('transaction_info');
         if($records->num_rows()>0) {

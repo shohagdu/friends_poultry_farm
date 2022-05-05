@@ -26,6 +26,7 @@ class Welcome extends CI_Controller {
         $data['transactionType']    =    $this->SETTINGS->transactionType();
         $data['todaySalesInfo']     =    $this->REPORT->todaySalesInfo($param);
         $transSummery               =    $this->REPORT->summeryReportsOfTransaction($param);
+
         $data['transSummery']       = !empty($transSummery)?array_column($transSummery,'amount','type'):'';
         $view = array();
         $data['title'] = "Dashboard";

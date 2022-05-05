@@ -571,6 +571,7 @@ class Shipment_info extends CI_Controller {
         if(empty($upId)){
             $this->db->trans_start();
             $data=[
+                'transCode'                 => time(),
                 'customer_member_id'        => $member_id,
                 'bank_id'                   => $accountID,
                 'credit_amount'             => $payment_now,

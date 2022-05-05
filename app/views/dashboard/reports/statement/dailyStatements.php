@@ -50,8 +50,8 @@
                             $paymentAmt     = 0;
                             $tCosting       = 0;
                             $tProfitLose    = 0;
-                            if(!empty($info)){
-                                foreach ($info as $row) {
+                            if(!empty($sales)){
+                                foreach ($sales as $row) {
                                     ?>
                                     <tr>
                                         <td><?php echo $i++; ?></td>
@@ -65,25 +65,23 @@
                                         <td class="text-left">
                                             <?php echo (!empty($row->customerName)?$row->customerName:'').(!empty($row->mobile)?' ['.$row->mobile.']':''); ?>
                                         </td>
-                                        <td><i class="badge"><?php echo (!empty($row->sub_total)?$row->sub_total:''); $tSub+=$row->sub_total; ?></i></td>
+                                        <td><?php echo (!empty($row->sub_total)?$row->sub_total:''); $tSub+=$row->sub_total; ?></td>
 
 
-                                        <td><i class="badge"><?php echo (!empty($row->discount)?$row->discount:''); $tDiscount+=$row->discount; ?></i></td>
-                                        <td><i class="badge"><?php echo $netTotal=(!empty($row->net_total)?$row->net_total:'0.00');  $tNetTotal+=$row->net_total; ?></i></td>
-                                        <td><i class="badge"><?php echo $ajustmentTotal=(!empty($row->remaining_due_make_discount)?$row->remaining_due_make_discount:'0.00');  $tAjustTotal+=$ajustmentTotal; ?></i></td>
+                                        <td><?php echo (!empty($row->discount)?$row->discount:''); $tDiscount+=$row->discount; ?></td>
+                                        <td><?php echo $netTotal=(!empty($row->net_total)?$row->net_total:'0.00');  $tNetTotal+=$row->net_total; ?></td>
+                                        <td><?php echo $ajustmentTotal=(!empty($row->remaining_due_make_discount)?$row->remaining_due_make_discount:'0.00');  $tAjustTotal+=$ajustmentTotal; ?></td>
 
-                                        <td><i class="badge"><?php echo $payment=(!empty($row->payment_amount)?$row->payment_amount:'0.00'); $paymentAmt+=$row->payment_amount; ?></i></td>
+                                        <td><?php echo $payment=(!empty($row->payment_amount)?$row->payment_amount:'0.00'); $paymentAmt+=$row->payment_amount; ?></td>
                                         <td>
-                                            <i class="badge"><?php echo $purchaseAmt=(!empty($row->getPurchaseAmount)?$row->getPurchaseAmount:'0.00'); $tCosting+=$row->getPurchaseAmount; ?></i>
+                                            <?php echo $purchaseAmt=(!empty($row->getPurchaseAmount)?$row->getPurchaseAmount:'0.00'); $tCosting+=$row->getPurchaseAmount; ?>
                                         </td>
                                         <td>
-                                            <i class="badge">
-                                                <?php
-                                                    $profitLose=(!empty($row->net_total)?($payment-$purchaseAmt):'0.00');
-                                                    echo number_format($profitLose,2);
-                                                    $tProfitLose+=$profitLose;
-                                                ?>
-                                            </i>
+                                            <?php
+                                                $profitLose=(!empty($row->net_total)?($netTotal-$purchaseAmt):'0.00');
+                                                echo number_format($profitLose,2);
+                                                $tProfitLose+=$profitLose;
+                                            ?>
                                         </td>
                                     </tr>
                                     <?php
@@ -111,7 +109,7 @@
                                 <h4>Customer Due Collection/Closing Discount/Cash Deposit to Customer Information: </h4>
                             </div>
                         </div>
-                        <table  class="table-style table" style="width:100%;border:1px solid #d0d0d0;" >
+                        <table  class="table-style table" style="width:100%;border:1px solid #d0d0d0;">
                             <thead>
                                 <tr>
                                     <th>S/L</th>
@@ -120,11 +118,14 @@
                                     <th>Customer Name </th>
                                     <th>Trans. Type </th>
                                     <th>Amount</th>
+                                    <th>Balance</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                    $tCollection='0.00';
+                                    $tCollection    = '0.00';
+                                    $tBalanced      = '0.00';
+                                    $bal            = '0.00';
                                     if(!empty($customerCollection)){
                                         foreach ($customerCollection as $collection){
                                 ?>
@@ -153,6 +154,20 @@
                                                     $tCollection+=$collection->amount;
                                                     ?>
                                                 </td>
+                                                <td class="text-right">
+                                                    <?php
+                                                    $type= (!empty($collection->type)?$collection->type:'');
+                                                    if($type==3) {
+                                                        $bal=(!empty($collection->amount) ? $collection->amount : '');
+                                                    }elseif ($type==11){
+                                                        $bal=(!empty($collection->amount) ? "-".$collection->amount :
+                                                            '');
+                                                    }
+
+                                                         echo number_format($tBalanced+=$bal,2);
+                                                    ?>
+                                                </td>
+
                                             </tr>
                                 <?php
                                         }
@@ -166,7 +181,9 @@
                                 <tr>
                                     <th colspan="5" class="text-right">Total Due Collection/Closing Discount/Cash
                                         Deposit Summery</th>
-                                    <th class="text-right"><?php echo (!empty($tCollection)?number_format($tCollection,2):"") ?></th>
+                                    <th class="text-center" colspan="2"><?php echo (!empty($tBalanced)?number_format
+                                        ($tBalanced,
+                                            2):"") ?></th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -214,9 +231,9 @@
                                                 ?>
                                             </td>
                                             <td class="text-right">
-                                                <?php echo (!empty($purchase->sumTotalPurchase)
+                                                <?php  echo $purchaseAmnt=(!empty($purchase->sumTotalPurchase)
                                                     ?$purchase->sumTotalPurchase:'');
-                                                $tPurchase+=$purchase->sumTotalPurchase;
+                                                $tPurchase+=$purchaseAmnt;
                                                 ?>
                                             </td>
                                         </tr>
@@ -228,7 +245,8 @@
                             <tfoot>
                                 <tr>
                                     <th colspan="5" class="text-right">Total Purchase (Supplier) Summery</th>
-                                    <th class="text-right"> <?php echo (!empty($tPurchase)?number_format($tPurchase,2):''); ?></th>
+                                    <th class="text-right"> <span class='badge'><?php echo (!empty($tPurchase)
+                                                ?number_format($tPurchase,2):''); ?></span></th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -268,9 +286,9 @@
                                         <td><?php echo (!empty($payment->member_name)?$payment->member_name:'');  ?></td>
 
                                         <td><?php echo (!empty($paymentremarks)?$payment->remarks:''); ?></td>
-                                        <td><i class="badge"><?php echo (!empty($payment->credit_amount)
+                                        <td class="text-right"> <?php echo (!empty($payment->credit_amount)
                                                     ?$payment->credit_amount:'');  $tPayemnt+=$payment->credit_amount;
-                                                    ?></i></td>
+                                                    ?></td>
 
                                     </tr>
                                     <?php
@@ -282,7 +300,8 @@
                             <tfoot>
                             <tr>
                                 <th colspan="5" class="text-right">Total Payment (Supplier) Summery</th>
-                                <th><i class="badge"><?php echo !empty($tPayemnt)? number_format($tPayemnt,2):'0.00'; ?></i></th>
+                                <th class="text-right"><i class="badge" ><?php echo !empty($tPayemnt)? number_format($tPayemnt,2):'0
+                                .00'; ?></i></th>
                             </tr>
                             </tfoot>
                         </table>
@@ -323,7 +342,7 @@
                                         <td><?php echo (!empty($row->expenseBankName)?$row->expenseBankName:'');  ?></td>
 
                                         <td><?php echo (!empty($row->remarks)?$row->remarks:''); ?></td>
-                                        <td><i class="badge"><?php echo (!empty($row->debit_amount)
+                                        <td class="text-right"><i class="badge"><?php echo (!empty($row->debit_amount)
                                                     ?$row->debit_amount:'');  $tNetTotal+=$row->debit_amount;?></i></td>
 
                                     </tr>
@@ -337,7 +356,7 @@
                             <tr>
                                 <th colspan="5" class="text-right">Total Expense  Summery</th>
 
-                                <th><i class="badge"><?php echo !empty($tNetTotal)? number_format($tNetTotal,2):'0.00'; ?></i></th>
+                                <th class="text-right"><i class="badge"><?php echo !empty($tNetTotal)? number_format($tNetTotal,2):'0.00'; ?></i></th>
 
                             </tr>
                             </tfoot>

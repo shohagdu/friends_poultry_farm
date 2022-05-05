@@ -145,6 +145,7 @@ class Purchases extends CI_Controller {
                 }
 
                 $purchase_transaction=[
+                    'purchase_id'               =>  $insert_id,
                     'transCode'                 =>  time(),
                     'customer_member_id'        =>  $supplierNameSearchId,
                     'payment_date'              =>  (!empty($purchaseDate)?$purchaseDate:''),
@@ -260,10 +261,12 @@ class Purchases extends CI_Controller {
                     'payment_date'              =>  (!empty($purchaseDate)?$purchaseDate:''),
                     'debit_amount'              =>  $purchaseTotalAmount,
                     'type'                      =>  6,
-                    'created_by'                =>  $this->userId,
-                    'created_time'              =>  $this->dateTime,
-                    'created_ip'                =>  $this->ipAddress,
+                    'updated_by'                =>  $this->userId,
+                    'updated_time'              =>  $this->dateTime,
+                    'updated_ip'                =>  $this->ipAddress,
                 ];
+
+                $this->db->where("type",6);
                 $this->db->where("purchase_id",$update_id);
                 $this->db->update("transaction_info",$purchase_transaction);
             }
@@ -409,7 +412,7 @@ class Purchases extends CI_Controller {
     function supplierPayment() {
         $view = array();
         $data['accounts']        = $this->SETTINGS->account();
-        $data['title']           = "Supplier Due Collection";
+        $data['title']           = "Supplier Payment";
         $view['content']         = $this->load->view('dashboard/shipment/member_due_collection', $data, TRUE);
         $this->load->view('dashboard/index', $view);
     }

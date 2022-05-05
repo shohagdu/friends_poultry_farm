@@ -24,16 +24,17 @@
                 <?php
                 $bg=[
                         3   =>  'bg-yellow',
+                        6   =>  'bg-aqua',
                         7   =>  'bg-green',
                         8   =>  'bg-yellow',
-                        11  =>  'bg-green',
-                        12  =>  'bg-yellow',
+                        11  =>  'bg-blue',
+                        12  =>  'bg-red',
                 ];
                 if(!empty($transSummery)){
                     foreach ($transSummery as $sumKey=> $summery){
                 ?>
                         <div class="col-md-4">
-                            <div class="small-box <?php echo (!empty($bg[$sumKey])?$bg[$sumKey]:''); ?>">
+                            <div class="small-box <?php echo (!empty($bg[$sumKey])?$bg[$sumKey]:'bg-aqua'); ?>">
                                 <div class="inner">
                                     <div style="height:35px;">
                                         <h3 style=" text-align: center;font-weight: bold;"><?php echo (!empty($summery)
