@@ -30,16 +30,16 @@
                             <thead>
                                 <tr>
                                     <th>S/L</th>
+                                    <th>Supplier Name</th>
                                     <th>Stock No</th>
                                     <th>Date</th>
-                                    <th class="width30per">Product Codes</th>
+                                    <th class="width20per">Product Codes</th>
+                                    <th class="width10per">Amount</th>
                                     <th>Note</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-
-
 
                             </tbody>
                             <tfoot>

@@ -499,10 +499,12 @@ $(document).ready(function(){
         },
         'columns': [
             { data: 'serial_no', orderable: true, searchable: false  },
+            { data: 'supplierName', name: 'customer_shipment_member_info.supplierName',searchable: false },
             { data: 'purchase_id', name: 'purchase_info_stock_in.purchase_id' },
             { data: 'purchase_date', name: 'purchase_info_stock_in.purchase_date' },
             { data: 'productInfo', name: 'product_info.productCode' },
             { data: 'note', name: 'purchase_info_stock_in.note'},
+            { data: 'amount', name: 'transaction_info.amount'},
             { data: 'action',orderable: false, searchable: false },
         ]
     });

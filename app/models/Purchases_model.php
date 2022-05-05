@@ -74,6 +74,7 @@ class Purchases_model extends CI_Model {
         $start      = $postData['start'];
         $rowperpage = $postData['length'];
         $searchInfo = (!empty($postData['search']['value'])?$postData['search']['value']:'');
+
         // Custom search filter
         $outletName       = (!empty($postData['outletID'])?$postData['outletID']:'');
         $purchaseNo       = (!empty($postData['purchaseID'])?$postData['purchaseID']:'');
@@ -107,25 +108,35 @@ class Purchases_model extends CI_Model {
         purchase_info_stock_in.purchase_date, 
         purchase_info_stock_in.note, 
         purchase_info_stock_in.is_active, 
-        outlet_setup.name as outlet_name,(SELECT GROUP_CONCAT(product_info.productCode SEPARATOR ', ' ) FROM `stock_info` INNER JOIN product_info ON product_info.id=stock_info.product_id WHERE stock_info.purchase_id=purchase_info_stock_in.id AND stock_info.is_active=1 $productCodeSearching    ) as productCodesInfo", false);
+        outlet_setup.name as outlet_name,(SELECT GROUP_CONCAT(product_info.productCode SEPARATOR ', ' ) FROM `stock_info` INNER JOIN product_info ON product_info.id=stock_info.product_id WHERE stock_info.purchase_id=purchase_info_stock_in.id AND stock_info.is_active=1 $productCodeSearching    ) as productCodesInfo,customer_shipment_member_info.name as supplierName,transaction_info.debit_amount as amount", false);
         if($searchQuery != ''){
             $this->db->where($searchQuery);
         }
         if($searchInfo != ''){
-            $this->db->like('purchase_id', $searchInfo);
-            $this->db->or_like('note', $searchInfo);
+            $this->db->like('purchase_info_stock_in.purchase_id', $searchInfo);
+            $this->db->or_like('purchase_info_stock_in.note', $searchInfo);
+            $this->db->or_like('customer_shipment_member_info.name', $searchInfo);
+            $this->db->or_like('transaction_info.debit_amount', $searchInfo);
         }
         $this->db->join('outlet_setup', 'outlet_setup.id = purchase_info_stock_in.outlet_id', 'left');
+        $this->db->join('customer_shipment_member_info', 'customer_shipment_member_info.id = purchase_info_stock_in.supplier_id', 'left');
+        $this->db->join('transaction_info', 'transaction_info.purchase_id = purchase_info_stock_in.id', 'inner');
+
+
+        $this->db->group_by("purchase_info_stock_in.id");
         $this->db->order_by("purchase_info_stock_in.id", "DESC");
-        $this->db->limit($rowperpage, $start);
+//        $this->db->limit($rowperpage, $start);
         $records = $this->db->get('purchase_info_stock_in')->result();
+       // return $this->db->last_query();
         $data = array();
         $i=(!empty($start)?$start+1:1);
         if(!empty($records)) {
             foreach ($records as $key => $record) {
-                $data[] = $record;
+                $data[]                         = $record;
                 $data[$key]->serial_no          = (int) $i++;
                 $data[$key]->purchase_date      =  date("d M, Y", strtotime($record->purchase_date));
+                $data[$key]->supplierName       = (!empty($record->supplierName)?$record->supplierName:'') ;
+                $data[$key]->amount             = (!empty($record->amount)?$record->amount:'') ;
                 $data[$key]->productInfo        = (!empty($record->productCodesInfo)?$record->productCodesInfo:'') ;
                 $data[$key]->is_active          =  ($record->is_active==1)?"<span class='badge bg-green'>Active</span>":"<span class='badge bg-red'>Inactive</span>";
                 $data[$key]->action = '<a href="'. base_url('purchases/update/'.$record->id).'"  class="btn btn-primary  btn-xs"  ><i  class="glyphicon glyphicon-pencil"></i> Edit</a> <a href="'. base_url('purchases/view_purchage_info/'.$record->id).'" class="btn btn-info  btn-xs"   ><i  class="glyphicon glyphicon-share-alt"></i> View</a> <button onclick="deletePurchaseInformation('.$record->id.')"  type="button" class="btn btn-danger  btn-xs"   ><i  class="glyphicon glyphicon-remove"></i> Delete</button>';
