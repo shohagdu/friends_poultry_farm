@@ -58,11 +58,22 @@
                                         <td><?php echo (!empty($acBalance->payment_date)?date('d M, Y',strtotime
                                             ($acBalance->payment_date)):'')
                                             ?></td>
-                                        <td><?php echo (!empty($acBalance->remarks)?strip_tags($acBalance->remarks):'').
-                                                (!empty ($acBalance->type)?" <> ".$acBalance->type:''). (!empty($acBalance->expense_ctg)? "<> ".$acBalance->expense_ctg:'') ?></td>
-                                        <td class="text-right"><?php echo $debit=(!empty($acBalance->debit_amount)
+                                        <td>
+                                            <?php echo (!empty($acBalance->remarks)?strip_tags
+                                                    ($acBalance->remarks)." <> ":'');
+                                            if($acBalance->parentType==8){
+                                                echo "Expense";
+                                            }else {
+                                                echo(!empty ($transType[$acBalance->type])
+                                                    ? $transType[$acBalance->type] : '');
+                                            }
+                                            echo (!empty ($acBalance->expenseTitle)? " <> ".$acBalance->expenseTitle:'') ?>
+                                        </td>
+                                        <td class="text-right">
+                                            <?php echo $debit=(!empty($acBalance->debit_amount)
                                                 ?$acBalance->debit_amount:'0.00')
-                                            ?></td>
+                                            ?>
+                                        </td>
                                         <td class="text-right"><?php echo $credit=(!empty($acBalance->credit_amount)
                                                 ?$acBalance->credit_amount:'0.00')
                                             ?></td>

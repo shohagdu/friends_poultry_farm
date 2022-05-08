@@ -346,18 +346,21 @@ class Cashbook_model extends CI_Model {
 
     public function getAccountStatement($where)
     {
-        $this->db->select('*',FALSE);
+        $this->db->select('transaction_info.*,expenseInfo.parent_id,expenseInfo.type as parentType,expenseCtg.title as expenseTitle
+        ',FALSE);
         $this->db->from('transaction_info');
+        $this->db->join("transaction_info as expenseInfo","expenseInfo.id=transaction_info.parent_id","left");
+        $this->db->join("all_settings_info as expenseCtg","expenseCtg.id=expenseInfo.expense_ctg","left");
 
         if(!empty($where['firstDate'])){
-            $this->db->where("payment_date >=", $where['firstDate']);
-            $this->db->where("payment_date <=", $where['toDate']);
+            $this->db->where("transaction_info.payment_date >=", $where['firstDate']);
+            $this->db->where("transaction_info.payment_date <=", $where['toDate']);
         }
         if(!empty($where['bank_id'])) {
-            $this->db->where('bank_id', $where['bank_id']);
+            $this->db->where('transaction_info.bank_id', $where['bank_id']);
         }
-        $this->db->where('is_active', 1);
-        $this->db->where_in('type', [2, 3, 4, 5,7, 8, 11]);
+        $this->db->where('transaction_info.is_active', 1);
+        $this->db->where_in('transaction_info.type', [2, 3, 4, 5,7, 8, 11]);
         $query_results = $this->db->get();
         if (($query_results->num_rows()>0)) {
             return   $query_results->result();

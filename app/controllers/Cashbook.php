@@ -15,6 +15,7 @@ class Cashbook extends CI_Controller {
 
         $this->load->model('Cashbook_model', 'CASHBOOK', TRUE);
         $this->load->model('Common_model', 'COMMON_MODEL', TRUE);
+        $this->load->model('Settings_model', 'SETTINGS', TRUE);
 
         $this->userId               = $this->session->userdata('user');
         $this->dateTime             = date('Y-m-d H:i:s');
@@ -271,7 +272,8 @@ class Cashbook extends CI_Controller {
     function accountsStatement($accountID) {
         $param['bank_id']      =    $accountID;
         $data = array();
-        $data['accountBalanceHistory'] = $this->CASHBOOK->getAccountStatement($param);
+        $data['accountBalanceHistory']  = $this->CASHBOOK->getAccountStatement($param);
+        $data['transType']              = $this->SETTINGS->transactionType();
         $view = array();
         $data['title'] = "Balance Statement";
         $view['content'] = $this->load->view('dashboard/cashbook/accounts/statement/accountsStatement', $data, TRUE);
@@ -296,6 +298,7 @@ class Cashbook extends CI_Controller {
         $data = array();
         $data['carryOverHeadBal'] = $this->CASHBOOK->bankavailableblance($accountID,$reportStartDate);
         $data['accountBalanceHistory'] = $this->CASHBOOK->getAccountStatement($param);
+        $data['transType']              = $this->SETTINGS->transactionType();
         $this->load->view('dashboard/cashbook/accounts/statement/accountsStatementAction', $data);
 
     }
