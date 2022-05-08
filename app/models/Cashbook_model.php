@@ -224,7 +224,7 @@ class Cashbook_model extends CI_Model {
             $this->db->where('payment_date < ', $endData);
         }
         $this->db->where('is_active', 1);
-        $this->db->where_in('type', [2, 3, 4, 5,7]);
+        $this->db->where_in('type', [2, 3, 4, 5,7, 8, 11]);
         $query_results = $this->db->get();
         $results = $query_results->row();
         if (($results->debit - $results->credit) != 0) {
@@ -357,7 +357,7 @@ class Cashbook_model extends CI_Model {
             $this->db->where('bank_id', $where['bank_id']);
         }
         $this->db->where('is_active', 1);
-        $this->db->where_in('type', [2, 3, 4, 5,7]);
+        $this->db->where_in('type', [2, 3, 4, 5,7, 8, 11]);
         $query_results = $this->db->get();
         if (($query_results->num_rows()>0)) {
             return   $query_results->result();

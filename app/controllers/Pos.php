@@ -127,30 +127,34 @@ class Pos extends CI_Controller
 
             if (!empty($totalAmount)) {
                 $total_transaction = [
-                    'transCode' => time(),
-                    'customer_member_id' => $customer,
-                    'sales_id' => $insert_id,
-                    'payment_by' => NULL,
-                    'credit_amount' => $totalAmount,
-                    'created_by' => $this->userId,
-                    'created_time' => $this->dateTime,
-                    'created_ip' => $this->ipAddress,
+                    'type'                  => 1,
+                    'transCode'             => time(),
+                    'payment_date'          =>  (!empty($saleDate)?date('Y-m-d',strtotime($saleDate)):''),
+                    'customer_member_id'    => $customer,
+                    'sales_id'              => $insert_id,
+                    'payment_by'            => NULL,
+                    'credit_amount'         => $totalAmount,
+                    'created_by'            => $this->userId,
+                    'created_time'          => $this->dateTime,
+                    'created_ip'            => $this->ipAddress,
                 ];
                 $this->db->insert("transaction_info", $total_transaction);
                 $parent_id = $this->db->insert_id();
             }
             if (!empty($paidNow)) {
                 $payment_transaction = [
-                    'transCode' => time(),
-                    'customer_member_id' => $customer,
-                    'sales_id' => $insert_id,
-                    'payment_by' => (!empty($payment_byInfo) ? json_encode($payment_byInfo) : ''),
-                    'debit_amount' => $paidNow,
-                    'bank_id' => $receivedBankAcc,
-                    'parent_id' => $parent_id,
-                    'created_by' => $this->userId,
-                    'created_time' => $this->dateTime,
-                    'created_ip' => $this->ipAddress,
+                    'type'                  => 2,
+                    'transCode'             => time(),
+                    'customer_member_id'    => $customer,
+                    'sales_id'              => $insert_id,
+                    'payment_date'          =>  (!empty($saleDate)?date('Y-m-d',strtotime($saleDate)):''),
+                    'payment_by'            => (!empty($payment_byInfo) ? json_encode($payment_byInfo) : ''),
+                    'debit_amount'          => $paidNow,
+                    'bank_id'               => $receivedBankAcc,
+                    'parent_id'             => $parent_id,
+                    'created_by'            => $this->userId,
+                    'created_time'          => $this->dateTime,
+                    'created_ip'            => $this->ipAddress,
                 ];
                 $this->db->insert("transaction_info", $payment_transaction);
             }
@@ -266,25 +270,32 @@ class Pos extends CI_Controller
             if(!empty($totalAmount)){
                 $total_transaction=[
                     'customer_member_id'    =>  $customer,
+                    'payment_date'          =>  (!empty($saleDate)?date('Y-m-d',strtotime($saleDate)):''),
                     'payment_by'            =>  NULL,
+                    'debit_amount'          =>  '0.00',
                     'credit_amount'         =>  $totalAmount,
                     'updated_by'            =>  $this->userId,
                     'updated_time'          =>  $this->dateTime,
                     'updated_ip'            =>  $this->ipAddress,
                 ];
-                $this->db->where('sha1(sales_id)',$insert_id)->update("transaction_info",$total_transaction);
+
+                $this->db->where('sha1(sales_id)',$insert_id)->where('type',1)->update("transaction_info",
+                    $total_transaction);
             }
             if(!empty($paidNow)){
                 $payment_transaction=[
                     'customer_member_id'        =>  $customer,
+                    'payment_date'              =>  (!empty($saleDate)?date('Y-m-d',strtotime($saleDate)):''),
                     'payment_by'                =>  (!empty($payment_byInfo)?json_encode($payment_byInfo):''),
+                    'credit_amount'             =>  '0.00',
                     'debit_amount'              =>  $paidNow,
                     'bank_id'                   =>  $receivedBankAcc,
                     'updated_by'                =>  $this->userId,
                     'updated_time'              =>  $this->dateTime,
                     'updated_ip'                =>  $this->ipAddress,
                 ];
-                $this->db->where('sha1(sales_id)',$insert_id)->update("transaction_info",$payment_transaction);
+                $this->db->where('sha1(sales_id)',$insert_id)->where('type',2)->update("transaction_info",
+                    $payment_transaction);
             }
             $redierct_page="pos/show/".$updatedID;
 

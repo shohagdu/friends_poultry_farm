@@ -491,7 +491,6 @@ class Settings extends CI_Controller
     }
     public function save_customer_member_info(){
         extract($_POST);
-
         $this->db->trans_start();
         if(empty($type)){
             echo json_encode(['status'=>'error','message'=>'Type is required','data'=>'']);exit;
@@ -505,7 +504,7 @@ class Settings extends CI_Controller
         if(empty($status)){
             echo json_encode(['status'=>'error','message'=>'Status is required','data'=>'']);exit;
         }
-        if(empty($openingBalanceType)){
+        if(empty($openingBalanceType) && $type==1){
             echo json_encode(['status'=>'error','message'=>'Opening Amount Type is required','data'=>'']);exit;
         }
 
@@ -528,27 +527,28 @@ class Settings extends CI_Controller
             $this->db->insert("customer_shipment_member_info", $info);
             $customer_id=$this->db->insert_id();
 
-
-            $payment_transaction=[
-                'customer_member_id'        =>  $customer_id,
-                'payment_date'              =>  date('Y-m-d'),
-                'remarks'                   =>  (!empty($remarks)?$remarks:''),
-                'is_opening_balance'        =>  2,
-                'created_by'                =>  $this->userId,
-                'created_time'              =>  $this->dateTime,
-                'created_ip'                =>  $this->ipAddress,
-            ];
-            if(!empty($openingBalanceType) && $openingBalanceType==1){ // Opening Due
-                $payment_transaction['credit_amount']   = (!empty($openingDue)?$openingDue:'0.00');
-                $payment_transaction['type']            = 10;
-            }elseif(!empty($openingBalanceType) &&  $openingBalanceType==2){ // Opening Deposited
-                $payment_transaction['debit_amount']    = (!empty($openingDue)?$openingDue:'0.00');
-                $payment_transaction['type']            = 9;
-            }else{
-                echo json_encode(['status'=>'error','message'=>'Opening Amount Type is required','data'=>'']);exit;
+            if($type==1) {
+                $payment_transaction = [
+                    'customer_member_id' => $customer_id,
+                    'payment_date' => date('Y-m-d'),
+                    'remarks' => (!empty($remarks) ? $remarks : ''),
+                    'is_opening_balance' => 2,
+                    'created_by' => $this->userId,
+                    'created_time' => $this->dateTime,
+                    'created_ip' => $this->ipAddress,
+                ];
+                if (!empty($openingBalanceType) && $openingBalanceType == 1) { // Opening Due
+                    $payment_transaction['credit_amount'] = (!empty($openingDue) ? $openingDue : '0.00');
+                    $payment_transaction['type'] = 10;
+                } elseif (!empty($openingBalanceType) && $openingBalanceType == 2) { // Opening Deposited
+                    $payment_transaction['debit_amount'] = (!empty($openingDue) ? $openingDue : '0.00');
+                    $payment_transaction['type'] = 9;
+                } else {
+                    echo json_encode(['status' => 'error', 'message' => 'Opening Amount Type is required', 'data' => '']);
+                    exit;
+                }
+                $this->db->insert("transaction_info", $payment_transaction);
             }
-            $this->db->insert("transaction_info",$payment_transaction);
-
             $message='Successfully Save Information';
             $customer_info=[
                 'id'=>$customer_id,
@@ -575,48 +575,50 @@ class Settings extends CI_Controller
             $this->db->where('id',$upId);
             $this->db->update("customer_shipment_member_info", $info);
 
-            $getOpeningBal=$this->REPORT->get_single_transaction_info(['transaction_info.customer_member_id'=>$upId,'transaction_info.is_opening_balance'=>2]);
+            if($type==1) {
+                $getOpeningBal = $this->REPORT->get_single_transaction_info(['transaction_info.customer_member_id' => $upId, 'transaction_info.is_opening_balance' => 2]);
 
 
-            if (empty($getOpeningBal)) {
-                $payment_transaction = [
-                    'customer_member_id'        => $upId,
-                    'payment_date'              => date('Y-m-d'),
-                    'remarks'                   => (!empty($remarks) ? $remarks : ''),
-                    'is_opening_balance'        => 2,
-                    'created_by'                => $this->userId,
-                    'created_time'              => $this->dateTime,
-                    'created_ip'                => $this->ipAddress,
-                ];
-                if(!empty($openingBalanceType) && $openingBalanceType==1){ // Opening Due
-                    $payment_transaction['credit_amount']   = (!empty($openingDue)?$openingDue:'0.00');
-                    $payment_transaction['type']            = 10;
-                }elseif(!empty($openingBalanceType) &&  $openingBalanceType==2){ // Opening Deposited
-                    $payment_transaction['debit_amount']    = (!empty($openingDue)?$openingDue:'0.00');
-                    $payment_transaction['type']            = 9;
+                if (empty($getOpeningBal)) {
+                    $payment_transaction = [
+                        'customer_member_id' => $upId,
+                        'payment_date' => date('Y-m-d'),
+                        'remarks' => (!empty($remarks) ? $remarks : ''),
+                        'is_opening_balance' => 2,
+                        'created_by' => $this->userId,
+                        'created_time' => $this->dateTime,
+                        'created_ip' => $this->ipAddress,
+                    ];
+                    if (!empty($openingBalanceType) && $openingBalanceType == 1) { // Opening Due
+                        $payment_transaction['credit_amount'] = (!empty($openingDue) ? $openingDue : '0.00');
+                        $payment_transaction['type'] = 10;
+                    } elseif (!empty($openingBalanceType) && $openingBalanceType == 2) { // Opening Deposited
+                        $payment_transaction['debit_amount'] = (!empty($openingDue) ? $openingDue : '0.00');
+                        $payment_transaction['type'] = 9;
+                    }
+
+                    $this->db->insert("transaction_info", $payment_transaction);
+
+                } else {
+                    $payment_transaction = [
+                        'remarks' => (!empty($remarks) ? $remarks : ''),
+                        'updated_by' => $this->userId,
+                        'updated_time' => $this->dateTime,
+                        'updated_ip' => $this->ipAddress,
+                    ];
+
+                    if (!empty($openingBalanceType) && $openingBalanceType == 1) { // Opening Due
+                        $payment_transaction['debit_amount'] = '0.00';
+                        $payment_transaction['credit_amount'] = (!empty($openingDue) ? $openingDue : '0.00');
+                        $payment_transaction['type'] = 10;
+                    } elseif (!empty($openingBalanceType) && $openingBalanceType == 2) { // Opening Deposited
+                        $payment_transaction['credit_amount'] = '0.00';
+                        $payment_transaction['debit_amount'] = (!empty($openingDue) ? $openingDue : '0.00');
+                        $payment_transaction['type'] = 9;
+                    }
+                    $this->db->where(['customer_member_id' => $upId, 'is_opening_balance' => 2]);
+                    $this->db->update("transaction_info", $payment_transaction);
                 }
-
-                $this->db->insert("transaction_info", $payment_transaction);
-
-            } else {
-                $payment_transaction = [
-                    'remarks'                   => (!empty($remarks) ? $remarks : ''),
-                    'updated_by'                => $this->userId,
-                    'updated_time'              => $this->dateTime,
-                    'updated_ip'                => $this->ipAddress,
-                ];
-
-                if(!empty($openingBalanceType) && $openingBalanceType==1){ // Opening Due
-                    $payment_transaction['debit_amount']    = '0.00';
-                    $payment_transaction['credit_amount']   = (!empty($openingDue)?$openingDue:'0.00');
-                    $payment_transaction['type']            = 10;
-                }elseif(!empty($openingBalanceType) &&  $openingBalanceType==2){ // Opening Deposited
-                    $payment_transaction['credit_amount']   = '0.00';
-                    $payment_transaction['debit_amount']    = (!empty($openingDue)?$openingDue:'0.00');
-                    $payment_transaction['type']            = 9;
-                }
-                $this->db->where(['customer_member_id' => $upId,'is_opening_balance' => 2]);
-                $this->db->update("transaction_info", $payment_transaction);
             }
 
 
