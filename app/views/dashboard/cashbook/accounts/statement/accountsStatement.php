@@ -89,7 +89,8 @@
                             <th colspan="3" class="text-right">Total Summery</th>
                             <th class="text-right"><?php echo (!empty($tDebit)?number_format($tDebit,2):'0.00')  ?></th>
                             <th class="text-right"><?php echo (!empty($tCredit)?number_format($tCredit,2):'0.00')  ?></th>
-                            <th class="text-right"><?php echo (!empty($tBalance)?number_format($tBalance,2):'0.00')  ?></th>
+                            <th class="text-right"><?php echo (!empty($tDebit-$tCredit)?number_format($tDebit-$tCredit,2):'0.00')
+                                ?></th>
                         </tr>
                     </tfoot>
                 </table>
